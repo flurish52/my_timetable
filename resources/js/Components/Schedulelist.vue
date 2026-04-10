@@ -18,12 +18,12 @@ defineProps({
         <!-- Header -->
         <div class="flex items-center justify-between px-4 pt-4 pb-1">
             <h3 class="text-base font-extrabold text-gray-900 tracking-tight">Today's Schedule</h3>
-            <button class="flex items-center gap-0.5 text-sm font-semibold text-secondary hover:opacity-75 transition-opacity">
+            <RouterLink to="/full_timetable" class="flex items-center gap-0.5 text-sm font-semibold text-secondary hover:opacity-75 transition-opacity">
                 See all
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-            </button>
+            </RouterLink>
         </div>
 
         <div class="mx-4 mt-2 border-t border-gray-100" />
@@ -44,9 +44,9 @@ defineProps({
 
         <!-- View Full Timetable CTA -->
         <div class="p-4 pt-3">
-            <button
+            <RouterLink
                 class="w-full flex items-center justify-between bg-secondary hover:bg-secondary/90 active:scale-[0.99] transition-all duration-200 text-white font-bold text-base rounded-2xl px-5 py-4 shadow-md shadow-secondary/25"
-            >
+             to="/full_timetable">
                 <div class="flex items-center gap-2.5">
                     <svg class="w-5 h-5 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -58,7 +58,7 @@ defineProps({
                 <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-            </button>
+            </RouterLink>
         </div>
 
     </div>

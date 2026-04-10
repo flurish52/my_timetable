@@ -29,8 +29,7 @@
             { "start": "10:00", "end": "11:00", "course": "Biology",     "code": "BIO 101", "venue": "Lab Block, Room 2" }
         ],
         "friday": [
-            { "start": "08:00", "end": "09:25", "course": "ASFSfASF",   "code": "ASF 101", "venue": "Room 5, Block D" },
-            { "start": "09:26", "end": "11:01", "course": "Mathematics", "code": "MTH 101", "venue": "Block A, Room 12" },
+            { "start": "09:26", "end": "13:01", "course": "Mathematics", "code": "MTH 101", "venue": "Block A, Room 12" },
             { "start": "13:00", "end": "14:00", "course": "Geography",   "code": "GEO 101", "venue": "Lecture Hall C" },
             { "start": "16:00", "end": "17:00", "course": "English",     "code": "ENG 101", "venue": "Lecture Hall B" }
         ]
