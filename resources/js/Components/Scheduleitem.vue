@@ -36,7 +36,7 @@ const c = (item) => colours[item.colour] ?? colours.primary
     <div class="flex items-center gap-1 md:gap-3 py-3.5">
 
         <!-- Accent bar -->
-        <div :class="['w-[3px] h-11 rounded-full flex-shrink-0', c(item).border]" />
+        <div :class="['w-[3px] h-11 rounded-full flex-shrink-0 bg-primary', c(item).border]" />
 
         <!-- Time -->
         <div class="w-[52px] flex-shrink-0 text-right leading-none">

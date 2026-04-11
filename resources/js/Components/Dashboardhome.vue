@@ -53,7 +53,7 @@ const {
 
         <!-- Main UI -->
         <div v-else-if="rawData" class="max-w-md mx-auto pb-10">
-            <div class="sticky top-0 z-50 bg-tertiary text-lg text-center w-full font-semibold text-primary tracking-wide py-1 shadow-sm">
+            <div class="sticky top-0 z-50 bg-primary text-lg text-center w-full font-semibold text-white tracking-wide py-1 shadow-sm">
                 my<span class="text-secondary font-bold">Timetable</span>
             </div>
             <GreetingHeader

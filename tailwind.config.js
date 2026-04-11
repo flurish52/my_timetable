@@ -15,7 +15,7 @@ export default {
                 sans: ['Fredoka', ...defaultTheme.fontFamily.sans],
             },
             colors: {
-                primary: '#2563EB',
+                primary: '#1E3A8F',
                 secondary: '#10B981',
                 tertiary: '#F56E0B',
             },

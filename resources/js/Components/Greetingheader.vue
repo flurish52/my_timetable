@@ -30,7 +30,7 @@ function getGreeting() {
             <p class="mt-1.5 text-sm text-gray-500 font-medium flex items-center gap-1">
                 You have
                 <span
-                    class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-tertiary text-white text-[11px] font-bold"
+                    class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-[11px] font-bold"
                 >
           {{ lectureCount }}
         </span>
