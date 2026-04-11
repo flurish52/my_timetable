@@ -1,15 +1,15 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useTimetable } from '../composables/useTimetable.js'
+import {ref, onMounted} from 'vue'
+import {useTimetable} from '../composables/useTimetable.js'
 
-import GreetingHeader      from './GreetingHeader.vue'
-import OngoingLectureCard  from './OngoingLectureCard.vue'
-import ScheduleList        from './ScheduleList.vue'
+import GreetingHeader from './GreetingHeader.vue'
+import OngoingLectureCard from './OngoingLectureCard.vue'
+import ScheduleList from './ScheduleList.vue'
 
 // ── Data fetching ─────────────────────────────────────────────────────────────
 const rawData = ref(null)
 const loading = ref(true)
-const error   = ref(null)
+const error = ref(null)
 
 onMounted(async () => {
     try {
@@ -33,11 +33,11 @@ const {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50">
+    <div class="relative min-h-screen bg-gray-50">
 
         <!-- Loading -->
         <div v-if="loading" class="flex flex-col items-center justify-center min-h-screen gap-3">
-            <div class="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+            <div class="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin"/>
             <p class="text-sm text-gray-400 font-medium">Loading your schedule…</p>
         </div>
 
@@ -53,7 +53,9 @@ const {
 
         <!-- Main UI -->
         <div v-else-if="rawData" class="max-w-md mx-auto pb-10">
-
+            <div class="sticky top-0 z-50 bg-tertiary text-lg text-center w-full font-semibold text-primary tracking-wide py-1 shadow-sm">
+                my<span class="text-secondary font-bold">Timetable</span>
+            </div>
             <GreetingHeader
                 :user="rawData.user"
                 :lecture-count="lectureCount"
@@ -66,7 +68,7 @@ const {
             />
 
 
-            <ScheduleList :items="upcomingItems" />
+            <ScheduleList :items="upcomingItems"/>
 
         </div>
     </div>
