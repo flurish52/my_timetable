@@ -1,6 +1,8 @@
 importScripts('https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js')
 importScripts('https://www.gstatic.com/firebasejs/10.0.0/firebase-messaging-compat.js')
 
+
+console.log('SW LOADED')
 firebase.initializeApp({
     apiKey: "AIzaSyBJI627pYksfTDGZHKEsVwvF_xvJwfO7m8",
     authDomain: "mytimetable-9beae.firebaseapp.com",
@@ -11,30 +13,14 @@ firebase.initializeApp({
 })
 
 const messaging = firebase.messaging()
-
-// Handles notifications when app is CLOSED or in background
-// messaging.onBackgroundMessage((payload) => {
-//     console.log("BG MESSAGE:", payload)
-//     self.registration.showNotification(payload.notification.title, {
-//         body: payload.notification.body,
-//         icon: '/icons/pwa-192x192.png'
-//     })
-// })
-
 messaging.onBackgroundMessage(function(payload) {
-    console.log("BG MESSAGE:", payload)
-
     self.registration.showNotification(
         payload.notification?.title || 'Notification',
         {
-            body: payload.notification?.body || 'eertertertert',
+            body: payload.notification?.body || 'New notification!',
             icon: '/icons/pwa-192x192.png'
         }
     )
 })
 
-// messaging.onBackgroundMessage(function(payload) {
-//     self.registration.showNotification(payload.notification.title, {
-//         body: payload.notification.body,
-//     })
-// })
+

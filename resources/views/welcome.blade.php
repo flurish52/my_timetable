@@ -14,11 +14,13 @@
     {{-- Apple Touch Icon --}}
     <link rel="apple-touch-icon" href="/icons/pwa-192x192.png" />
     <link rel="manifest" href="/build/manifest.webmanifest" />
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     {{-- Vite assets (vite-plugin-pwa auto-injects the manifest link) --}}
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite('resources/css/app.css')
 </head>
 <body>
 <div id="app"></div>
-{{--@vite('resources/js/app.js')--}}
+@vite('resources/js/app.js')
 </body>
 </html>

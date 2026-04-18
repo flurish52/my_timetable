@@ -1,10 +1,8 @@
 <template>
-
     <nav>
         <InstallPWA />   <!-- drop it right here -->
         <NotificationPrompt />
     </nav>
-
     <router-view />
 </template>
 <script setup>
@@ -16,5 +14,4 @@ import {onMounted} from "vue";
 onMounted(() => {
     setupNotifications()
 })
-
 </script>
