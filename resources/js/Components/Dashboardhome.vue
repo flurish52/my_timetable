@@ -13,7 +13,9 @@ const error = ref(null)
 
 onMounted(async () => {
     try {
-        const res = await fetch('/data/timetable.json')
+        const res = await fetch('/data/timetable.json', {
+            cache: 'no-cache'
+        })
         if (!res.ok) throw new Error(`HTTP ${res.status} — could not load timetable.json`)
         rawData.value = await res.json()
     } catch (err) {
