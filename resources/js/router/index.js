@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import Home from '../pages/Home.vue'
 import FullTimeTable from "@/pages/FullTimeTable.vue";
+import PastQuestions from "@/pages/PastQuestions.vue";
 
 const routes = [
     {
@@ -11,6 +12,10 @@ const routes = [
     {
         path: '/full_timetable',
         component: FullTimeTable,
+    },
+    {
+        path: '/pastquestions',
+        component: PastQuestions,
     },
 ]
 

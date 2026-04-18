@@ -1,6 +1,7 @@
 <script setup>
 import {ref, computed, onMounted} from 'vue'
 import { RouterLink } from 'vue-router'
+import BackButton from "../Components/BackButton.vue";
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 const rawData = ref(null)
@@ -124,7 +125,7 @@ function isOngoingRow(hourSlot) {
               sticky left-0 → time column stays fixed while scrolling horizontally
             -->
 
-            <header class="flex justify-between items-center w-full bg-white border-b px-4 py-3 sticky top-0 z-50 shadow-sm ">
+            <header class="flex justify-between items-center w-full bg-white border-b px-4 py-3 sticky top-0 z-40 shadow-sm ">
                 <div>
 
                     <h1 class="text-2xl font-display font-bold text-primary">
@@ -135,10 +136,6 @@ function isOngoingRow(hourSlot) {
                         View all lectures and free periods for the week
                     </p>
                 </div>
-                <RouterLink to="/" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-100 rounded-md transition">
-                    <span class="text-lg">←</span>
-                    Back
-                </RouterLink>
             </header>
 
             <div class="flex-1 overflow-auto" id="tt-scroll">
