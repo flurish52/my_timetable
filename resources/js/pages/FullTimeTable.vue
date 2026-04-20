@@ -1,7 +1,6 @@
 <script setup>
 import {ref, computed, onMounted} from 'vue'
-import { RouterLink } from 'vue-router'
-import BackButton from "../Components/BackButton.vue";
+import GuestLayout from "@/Layouts/GuestLayout.vue";
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 const rawData = ref(null)
@@ -104,7 +103,8 @@ function isOngoingRow(hourSlot) {
 </script>
 
 <template>
-    <div class="flex px-4 md:px-12 flex-col h-full bg-white">
+    <GuestLayout>
+        <div class="flex px-4 md:px-12 flex-col h-full bg-white">
         <!-- Loading -->
         <div v-if="loading" class="flex-1 flex flex-col items-center justify-center gap-3">
             <div class="w-8 h-8 rounded-full border-4 border-primary/20 border-t-primary animate-spin"/>
@@ -146,7 +146,7 @@ function isOngoingRow(hourSlot) {
                     <tr>
                         <!-- Corner cell -->
                         <th
-                            class="sticky top-0 left-0 z-40 bg-white border-b border-r border-gray-200 px-3 py-3 w-24 min-w-[96px]"
+                            class="sticky top-0 left-0 z-30 bg-white border-b border-r border-gray-200 px-3 py-3 w-24 min-w-[96px]"
                         >
                             <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Time</span>
                         </th>
@@ -156,7 +156,7 @@ function isOngoingRow(hourSlot) {
                             v-for="day in DAYS"
                             :key="day"
                             :class="[
-                  'sticky top-0 z-30 border-b border-r border-gray-200 last:border-r-0 px-2 py-3 text-center',
+                  'sticky top-0 z-20 border-b border-r border-gray-200 last:border-r-0 px-2 py-3 text-center',
                   day === todayKey ? 'bg-secondary/5' : 'bg-white',
                 ]"
                         >
@@ -275,6 +275,7 @@ function isOngoingRow(hourSlot) {
 
         </template>
     </div>
+    </GuestLayout>
 </template>
 
 <style scoped>

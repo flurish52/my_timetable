@@ -6,10 +6,10 @@
                 :key="item.to"
                 class="flex-1"
             >
-                <RouterLink
-                    :to="item.to"
+                <Link
+                    :href="item.to"
                     class="flex flex-col items-center justify-center gap-1 py-2.5 px-1 rounded-xl mx-0.5 my-1 text-[var(--color-muted,#94a3b8)] transition-all duration-200 no-underline group"
-                    :class="{ 'is-active': route.path === item.to }"
+                    :class="{ 'is-active': page.url === item.to }"
                 >
                     <span
                         class="flex items-center justify-center w-6 h-6 transition-transform duration-200 group-[.is-active]:scale-110"
@@ -18,16 +18,18 @@
                     <span class="text-[0.65rem] font-semibold tracking-wide leading-none">
                         {{ item.label }}
                     </span>
-                </RouterLink>
+                </Link>
             </li>
         </ul>
     </nav>
 </template>
 
 <script setup>
-import { RouterLink, useRoute } from 'vue-router'
+import {Link} from "@inertiajs/vue3";
 
-const route = useRoute()
+import { usePage } from '@inertiajs/vue3'
+
+const page = usePage()
 
 const navItems = [
     {

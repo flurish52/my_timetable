@@ -6,8 +6,15 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
+import { setupNotifications } from '../composables/useNotifications.js'
+import {onMounted} from "vue";
 
 const showingNavigationDropdown = ref(false);
+
+onMounted(()=>{
+    setupNotifications()
+})
+
 </script>
 
 <template>

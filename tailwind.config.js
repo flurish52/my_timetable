@@ -13,7 +13,12 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Fredoka', ...defaultTheme.fontFamily.sans],
+            },
+            colors: {
+                primary: '#01629c',
+                secondary: '#10B981',
+                tertiary: '#F56E0B',
             },
         },
     },

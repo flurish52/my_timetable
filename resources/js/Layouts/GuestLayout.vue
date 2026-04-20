@@ -1,22 +1,30 @@
 <script setup>
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import { Link } from '@inertiajs/vue3';
+import NotificationPrompt from "@/Components/Notifications/NotificationPrompt.vue";
+import InstallPWA from "@/Components/InstallPWA.vue";
+import MobileNav from "@/Components/MobileNav.vue";
+import {setupNotifications} from '../composables/useNotifications.js'
+import {onMounted} from "vue";
+import LoginNav from "@/Components/LoginNav.vue";
+
+onMounted(() => {
+    setupNotifications()
+})
+
 </script>
 
 <template>
-    <div
-        class="flex min-h-screen flex-col items-center bg-gray-100 pt-6 sm:justify-center sm:pt-0"
-    >
-        <div>
-            <Link href="/">
-                <ApplicationLogo class="h-20 w-20 fill-current text-gray-500" />
-            </Link>
-        </div>
 
-        <div
-            class="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg"
-        >
-            <slot />
-        </div>
+    <div
+        class="sticky top-0 z-50 bg-primary text-lg text-center w-full font-semibold text-white tracking-wide py-1 shadow-sm">
+        my<span class="text-secondary font-bold">Timetable</span>
+    </div>
+    <nav>
+        <LoginNav/>
+        <NotificationPrompt/>
+    </nav>
+    <slot/>
+
+    <div class="mt-24">
+        <MobileNav/>
     </div>
 </template>

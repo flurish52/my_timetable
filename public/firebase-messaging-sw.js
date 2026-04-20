@@ -1,8 +1,6 @@
 importScripts('https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js')
 importScripts('https://www.gstatic.com/firebasejs/10.0.0/firebase-messaging-compat.js')
 
-
-console.log('SW LOADED')
 firebase.initializeApp({
     apiKey: "AIzaSyBJI627pYksfTDGZHKEsVwvF_xvJwfO7m8",
     authDomain: "mytimetable-9beae.firebaseapp.com",
