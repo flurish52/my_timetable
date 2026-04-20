@@ -1,0 +1,1 @@
+import{o as e,g as o,a as t}from"./app-DY_CmPhN.js";import{_ as a}from"./Dashboardhome-C7auurE1.js";/* empty css            */import"./_plugin-vue_export-helper-DlAUqK2U.js";const r={class:"md:p-4"},d={__name:"Home",setup(s){return(_,c)=>(e(),o("div",r,[t(a)]))}};export{d as default};

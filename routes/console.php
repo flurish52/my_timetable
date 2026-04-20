@@ -8,4 +8,4 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('timetable:check')->everyMinute();
+Schedule::command('timetable:check')->timezone('Africa/Lagos')->everyMinute();
