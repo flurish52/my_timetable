@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen flex items-start justify-center px-4 bg-[var(--color-bg,#f5f7fa)] font-inherit">
+    <div class="min-h-screen flex items-start justify-center bg-[var(--color-bg,#f5f7fa)] font-inherit">
 
         <div
             class="w-full max-w-[680px] bg-[var(--color-surface,#fff)] border border-[var(--color-border,#e2e8f0)] rounded-2xl p-8 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
@@ -71,12 +71,12 @@
                 <li
                     v-for="(file, i) in filtered"
                     :key="file.name"
-                    class="flex items-center gap-4 py-[0.9rem] border-b border-[var(--color-border,#f0f4f8)] last:border-b-0 animate-[fadeUp_0.35s_ease_both]"
+                    class="flex items-center gap-4 py-[0.9rem] border-b border-[var(--color-border,#f0f4f8)] last:border-b-0 animate-[fadeUp_0.35s_ease_both] border-b-2 border-primary/20"
                     :style="{ animationDelay: `${i * 40}ms` }"
                 >
                     <!-- File icon based on type -->
                     <span
-                        class="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center"
+                        class="shrink-0 w-12 h-12 p-0 rounded-lg flex items-center justify-center"
                         :class="[
                             ['docx','doc'].includes(ext(file.name))
                                 ? 'bg-[color-mix(in_srgb,var(--color-secondary,#0ea5e9)_12%,transparent)] text-[var(--color-secondary,#0ea5e9)]'
@@ -85,7 +85,7 @@
                                     : 'bg-[color-mix(in_srgb,var(--color-primary,#3b82f6)_10%,transparent)] text-[var(--color-primary,#3b82f6)]'
                         ]"
                     >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        <svg width="32" height="32" viewBox="0 0 22 22" fill="none" stroke="currentColor"
                              stroke-width="1.8">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline
                             points="14 2 14 8 20 8"/>
@@ -97,32 +97,37 @@
                             class="font-semibold text-[0.95rem] text-[var(--color-text,#1a202c)] whitespace-nowrap overflow-hidden text-ellipsis">
                             {{ label(file.name) }}
                         </span>
+
+
+                        <div class="flex justify-between">
                         <span class="flex items-center gap-2">
                             <span
                                 class="text-[0.7rem] font-bold tracking-[0.04em] px-[0.45rem] py-[0.1rem] rounded-[0.3rem] bg-[color-mix(in_srgb,var(--color-primary,#3b82f6)_12%,transparent)] text-[var(--color-primary,#3b82f6)]">
                                 {{ ext(file.name).toUpperCase() }}
                             </span>
-                            <!--                            <span v-if="file.size" class="text-[0.75rem] text-[var(&#45;&#45;color-muted,#a0aec0)]">-->
-                            <!--                                {{ formatSize(file.size) }}-->
-                            <!--                            </span>-->
+                            <span v-if="file.size"
+                                  class="text-[0.75rem] text-[var(--color-muted,#a0aec0)]">
+                                {{ formatSize(file.size) }}
+                            </span>
                         </span>
-                    </div>
-
-                    <a
-                        class="shrink-0 inline-flex items-center gap-[0.45rem] px-4 py-2 bg-primary text-white rounded-lg text-[0.85rem] font-semibold no-underline transition-[opacity,transform] duration-150 hover:opacity-90 hover:-translate-y-px active:opacity-100 active:translate-y-0 font-inherit"
-                        :href="`/past_questions/${file.name}`"
-                        :download="file.name"
-                    >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                             stroke-width="2.5">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                            <polyline points="7 10 12 15 17 10"/>
-                            <line x1="12" y1="15" x2="12" y2="3"/>
-                        </svg>
-                        <span class="">
+                            <a
+                                class="shrink-0 inline-flex items-center gap-[0.45rem] px-4 py-2 bg-primary text-white rounded-lg text-[0.85rem] font-semibold no-underline transition-[opacity,transform] duration-150 hover:opacity-90 hover:-translate-y-px active:opacity-100 active:translate-y-0 font-inherit"
+                                :href="`/past_questions/${file.name}`"
+                                :download="file.name"
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2.5">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                <span class="">
                         Download
                         </span>
-                    </a>
+                            </a>
+                        </div>
+                    </div>
+
                 </li>
             </ul>
 
