@@ -3,12 +3,14 @@
 
         <div
             class="w-full max-w-[680px] bg-[var(--color-surface,#fff)] border border-[var(--color-border,#e2e8f0)] rounded-2xl p-8 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+                <BackButton route="/pastquestions"/>
 
             <!-- Header -->
             <div class="mb-6">
-                <h1 class="m-0 mb-1 text-[1.4rem] font-bold text-[var(--color-text,#1a202c)]">Federal College of Obudu Past Questions</h1>
-                <p class="m-0 text-sm text-[var(--color-muted,#718096)]">Browse and download available past question
+                <h1 class="m-0 mb-1 text-[1.4rem] font-bold text-[var(--color-text,#1a202c)]">{{course.course_title}} Past Questions</h1>
+                <p class="m-0 text-sm text-[var(--color-muted,#718096)]">Browse and download available past question on {{course.course_title}}
                     papers</p>
+
             </div>
 
             <!-- Search -->
@@ -69,68 +71,71 @@
             <!-- File List -->
             <ul v-else class="list-none m-0 p-0">
                 <li
-                    v-for="(course, i) in filtered"
-                    :key="course.course_title"
-                    class="flex items-start gap-4 py-[0.9rem] border-b border-[var(--color-border,#f0f4f8)] last:border-b-0 animate-[fadeUp_0.35s_ease_both] border-b-2 border-primary/20"
+                    v-for="(file, i) in filtered"
+                    :key="file.name"
+                    class="flex items-center gap-4 py-[0.9rem] border-b border-[var(--color-border,#f0f4f8)] last:border-b-0 animate-[fadeUp_0.35s_ease_both] border-b-2 border-primary/20"
                     :style="{ animationDelay: `${i * 40}ms` }"
                 >
-                    <!-- Course icon based on type -->
-                    <div
-                        class="shrink-0 w-18 h-18 p-0 bg-primary/10 rounded-lg flex items-center justify-center">
-                            <svg width="44" height="44" viewBox="0 0 21 21" fill="none" stroke="currentColor" stroke-width="1.8"
-                                 stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 6a3 3 0 0 1 3-3h12v18H6a3 3 0 0 1-3-3z"/>
-                                <path d="M18 3a3 3 0 0 1 3 3v12a3 3 0 0 0-3-3H6"/>
-                                <path d="M8 8h6"/>
-                                <path d="M8 12h6"/>
-                            </svg>
-                    </div>
+                    <!-- File icon based on type -->
+                    <span
+                        class="shrink-0 w-12 h-12 p-0 rounded-lg flex items-center justify-center"
+                        :class="[
+                            ['docx','doc'].includes(ext(file.name))
+                                ? 'bg-[color-mix(in_srgb,var(--color-secondary,#0ea5e9)_12%,transparent)] text-[var(--color-secondary,#0ea5e9)]'
+                                : ['xlsx','xls'].includes(ext(file.name))
+                                    ? 'bg-[color-mix(in_srgb,var(--color-tertiary,#10b981)_12%,transparent)] text-[var(--color-tertiary,#10b981)]'
+                                    : 'bg-[color-mix(in_srgb,var(--color-primary,#3b82f6)_10%,transparent)] text-[var(--color-primary,#3b82f6)]'
+                        ]"
+                    >
+                        <svg width="32" height="32" viewBox="0 0 22 22" fill="none" stroke="currentColor"
+                             stroke-width="1.8">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline
+                            points="14 2 14 8 20 8"/>
+                        </svg>
+                    </span>
 
-                    <div :title="course.course_title" class="flex-1 min-w-0 flex flex-col gap-1">
+                    <div :title="label(file.name)" class="flex-1 min-w-0 flex flex-col gap-1">
                         <span
                             class="font-semibold text-[0.95rem] text-[var(--color-text,#1a202c)] whitespace-nowrap overflow-hidden text-ellipsis">
-                            {{ label(course.course_title) }} Past questions
+                            {{ label(file.name) }} past questions
                         </span>
 
 
                         <div class="flex justify-between">
                         <span class="flex items-center gap-2">
-                            <span v-if="course?.files"
+                            <span
+                                class="text-[0.7rem] font-bold tracking-[0.04em] px-[0.45rem] py-[0.1rem] rounded-[0.3rem] bg-[color-mix(in_srgb,var(--color-primary,#3b82f6)_12%,transparent)] text-[var(--color-primary,#3b82f6)]">
+                                {{ ext(file.name).toUpperCase() }}
+                            </span>
+                            <span v-if="file.size"
                                   class="text-[0.75rem] text-[var(--color-muted,#a0aec0)]">
-                                {{ course.files.length }} files
+                                {{ formatSize(file.size) }}
                             </span>
                         </span>
                             <a
-                                v-if="course.files.length !== 0"
                                 class="shrink-0 inline-flex items-center gap-[0.45rem] px-4 py-2 bg-primary text-white rounded-lg text-[0.85rem] font-semibold no-underline transition-[opacity,transform] duration-150 hover:opacity-90 hover:-translate-y-px active:opacity-100 active:translate-y-0 font-inherit"
-                                :href="`/pastquestions/${course.course_title}`">
+                                :href="`/past_questions/${file.name}`"
+                                :download="file.name"
+                            >
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                      stroke-width="2.5">
-                                    <circle cx="12" cy="12" r="3"/>
-                                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/>
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
                                 </svg>
-                                <span>View</span>
+                                <span class="">
+                        Download
+                        </span>
                             </a>
-                            <button
-                                v-else
-                                title="No Files"
-                                class="shrink-0 inline-flex items-center gap-[0.45rem] px-4 py-2 bg-gray-500 text-white rounded-lg text-[0.85rem] font-semibold no-underline transition-[opacity,transform] duration-150 hover:opacity-90 hover:-translate-y-px cursor-not-allowed">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                     stroke-width="2.5">
-                                    <circle cx="12" cy="12" r="3"/>
-                                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/>
-                                </svg>
-                                <span>View</span>
-                            </button>
                         </div>
                     </div>
 
                 </li>
             </ul>
 
-            <p v-if="!loading && !error && courses.length"
+            <p v-if="!loading && !error && course.files.length"
                class="mt-4 text-right text-[0.78rem] text-[var(--color-muted,#a0aec0)]">
-                {{ filtered.length }} of {{ courses.length }} courses{{ courses.length !== 1 ? 's' : '' }}
+                {{ filtered.length }} of {{ course.files.length }} file{{ course.files.length !== 1 ? 's' : '' }}
             </p>
         </div>
     </div>
@@ -138,11 +143,19 @@
 
 <script setup>
 import {ref, computed, onMounted} from 'vue'
+import { useRoute } from 'vue-router'
+import BackButton from "../Components/BackButton.vue";
+
+const route = useRoute()
+const course_title = route.params.course_title
+
+
 
 const courses = ref([])
 const query = ref('')
 const loading = ref(true)
 const error = ref(null)
+let course  = ref([])
 
 onMounted(async () => {
     try {
@@ -152,6 +165,8 @@ onMounted(async () => {
         if (!res.ok) throw new Error(`Could not load file list (${res.status})`)
         const data = await res.json()
         courses.value = Array.isArray(data) ? data : data.files ?? []
+        course.value = courses.value.filter(c =>c.course_title === course_title)
+        course.value = course.value[0]
     } catch (e) {
         error.value = e.message
     } finally {
@@ -161,29 +176,26 @@ onMounted(async () => {
 
 const filtered = computed(() => {
     const q = query.value.trim().toLowerCase()
-    if (!q) return courses.value
-    return courses.value.filter(c => c.course_title.toLowerCase().includes(q))
-    console.log(courses)
-
+    if (!q) return course.value.files
+    return course.value.files.filter(f => f.name.toLowerCase().includes(q))
 })
 
-//
-function label(course_title) {
-    return course_title
+function label(name) {
+    return name
         .replace(/\.[^.]+$/, '')
         .replace(/[_-]+/g, ' ')
         .replace(/\b\w/g, c => c.toUpperCase())
 }
 
-// function ext(name) {
-//     return (name.match(/\.([^.]+)$/) ?? ['', 'file'])[1].toLowerCase()
-// }
-//
-// function formatSize(bytes) {
-//     if (bytes < 1024) return `${bytes} B`
-//     if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`
-//     return `${(bytes / 1048576).toFixed(1)} MB`
-// }
+function ext(name) {
+    return (name.match(/\.([^.]+)$/) ?? ['', 'file'])[1].toLowerCase()
+}
+
+function formatSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / 1048576).toFixed(1)} MB`
+}
 </script>
 
 <style>
