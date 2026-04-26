@@ -71,7 +71,11 @@
     ]
   },
   "resources/css/app.css": {
+<<<<<<< HEAD
     "file": "assets/app-CCkpf8O1.css",
+=======
+    "file": "assets/app-yXHpIn9S.css",
+>>>>>>> main
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -80,7 +84,11 @@
     ]
   },
   "resources/js/app.js": {
+<<<<<<< HEAD
     "file": "assets/app-DY_CmPhN.js",
+=======
+    "file": "assets/app-CSlhTu0O.js",
+>>>>>>> main
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PastQuestion;
 use App\Http\Requests\StorePastQuestionRequest;
 use App\Http\Requests\UpdatePastQuestionRequest;
+use GuzzleHttp\Psr7\Request;
 use Inertia\Inertia;
 
 class PastQuestionController extends Controller
@@ -16,6 +17,12 @@ class PastQuestionController extends Controller
     {
         return inertia::render('PastQuestions', [
 
+        ]);
+    }
+    public function showCoursePapers($course_title)
+    {
+        return inertia::render('PastQuestionsPerCourse', [
+            'course_title' => $course_title
         ]);
     }
 

@@ -19,6 +19,8 @@ Route::get('/', function () {
 
     Route::get('/full_timetable', [TimeTableController::class, 'index'])->name('view.full_timetable');
     Route::get('/pastquestions', [PastQuestionController::class, 'index'])->name('view.past_questions');
+    Route::get('/pastquestions/{course_title}', [PastQuestionController::class, 'showCoursePapers'])
+        ->name('view.past_questions_per_course');
 
 
 
