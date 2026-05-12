@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
-import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 import { VitePWA } from 'vite-plugin-pwa';
 
@@ -54,9 +53,9 @@ export default defineConfig({
         }),
     ],
     server: {
+        host: '0.0.0.0',
         watch: {
             ignored: ['**/storage/framework/views/**'],
-            host: 'localhost'
         },
     },
     resolve: {

@@ -1,1 +1,0 @@
-import{o as e,g as n,d as r}from"./app-BUrMEj50.js";import{_ as t}from"./_plugin-vue_export-helper-DlAUqK2U.js";const s={};function c(a,o){return e(),n("div",null,[...o[0]||(o[0]=[r("img",{src:"/icons/pwa-192x192.png",alt:"Logo"},null,-1)])])}const p=t(s,[["render",c]]);export{p as A};
