@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,13 +34,20 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'currentUrl' => 'nullable|string|max:255',
+            'username' => 'required|string|max:255|alpha_dash|unique:' . User::class,
+            'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
+            'phone' => 'nullable|string|max:20|unique:' . User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
-
+//        dd($request->all());
         $user = User::create([
             'name' => $request->name,
+            'username' => $request->username,
             'email' => $request->email,
+            'phone' => $request->phone,
+            'is_online' => true,
+            'last_login_at' => Carbon::now(),
             'password' => Hash::make($request->password),
         ]);
 
@@ -47,6 +55,9 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        if ($request->currentUrl && str_starts_with($request->currentUrl, config('app.url'))) {
+            return redirect()->to($request->currentUrl);
+        }
+        return redirect()->intended(route('dashboard', absolute: false));
     }
 }

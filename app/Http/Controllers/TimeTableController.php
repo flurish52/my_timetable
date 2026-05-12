@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\TimeTable;
 use App\Http\Requests\StoreTimeTableRequest;
 use App\Http\Requests\UpdateTimeTableRequest;
+use App\Models\TimetableSlot;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class TimeTableController extends Controller
@@ -14,8 +16,12 @@ class TimeTableController extends Controller
      */
     public function index()
     {
+        $user = Auth::user();
         return inertia::render('FullTimeTable', [
-
+            'timetable' => TimetableSlot::with('programme', 'course')
+                ->where('programme_id', $user->programme_id)
+                ->get(),
+            'user' => $user,
         ]);
     }
 

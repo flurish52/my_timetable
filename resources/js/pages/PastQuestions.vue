@@ -5,10 +5,59 @@
             class="w-full max-w-[680px] bg-[var(--color-surface,#fff)] border border-[var(--color-border,#e2e8f0)] rounded-2xl p-8 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
 
             <!-- Header -->
-            <div class="mb-6">
-                <h1 class="m-0 mb-1 text-[1.4rem] font-bold text-[var(--color-text,#1a202c)]">Federal College of Obudu Past Questions</h1>
-                <p class="m-0 text-sm text-[var(--color-muted,#718096)]">Browse and download available past question
-                    papers</p>
+            <div class="mb-6 pt-2 bg-primary/5 rounded-md px-6">
+                <div class="flex items-start gap-5">
+
+<!--                    &lt;!&ndash; Icon block &ndash;&gt;-->
+<!--                    <div class="w-13 h-13 shrink-0 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center text-2xl">-->
+<!--                        🎯-->
+<!--                    </div>-->
+
+                    <!-- Text content -->
+                    <div class="flex-1 min-w-0">
+
+                        <!-- Title + badge -->
+                        <div class="flex items-center gap-2.5 flex-wrap mb-1.5">
+                            <h1 class="m-0 text-[1.35rem] font-semibold text-gray-900 leading-snug">
+                                Your exam edge starts here
+                            </h1>
+                            <span class="text-xs font-medium px-2.5 py-0.5 rounded-md bg-green-50 text-green-700">
+          Answers included
+        </span>
+                        </div>
+
+                        <!-- Description -->
+                        <p class="m-0 mb-4 text-[0.95rem] text-gray-500 leading-relaxed">
+                            Browse real past question papers from
+                            <span class="font-medium text-gray-800">Federal College of Obudu</span>
+                            with answers and walk into every exam knowing exactly what to expect,
+                            not just hoping for the best.
+                        </p>
+
+                        <!-- Meta pills -->
+                        <div class="flex items-center gap-6 flex-wrap">
+                            <div class="flex items-center gap-1.5">
+                                <i class="ti ti-books text-base text-gray-400"></i>
+                                <span class="text-xs text-gray-400">Multiple courses</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <i class="ti ti-circle-check text-base text-green-500"></i>
+                                <span class="text-xs text-gray-400">Answers included</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <i class="ti ti-download text-base text-gray-400"></i>
+                                <span class="text-xs text-gray-400">Download instantly</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <i class="ti ti-calendar text-base text-gray-400"></i>
+                                <span class="text-xs text-gray-400">Past sessions included</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <hr class="mt-5 border-gray-100" />
             </div>
 
             <!-- Search -->

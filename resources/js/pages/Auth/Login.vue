@@ -6,6 +6,8 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import {setupNotifications} from "@/composables/useNotifications.js";
+import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 
 defineProps({
     canResetPassword: {
@@ -23,19 +25,57 @@ const form = useForm({
 });
 
 const submit = () => {
+    form.email = form.email.toLowerCase();
     form.post(route('login'), {
-        onFinish: () => form.reset('password'),
-    });
-};
+        onSuccess: async () => {
+            window.location.reload()
+            await setupNotifications()
+        },
+
+        onError: (errors) => {
+            console.log(errors)
+        },
+
+        onFinish: () => {
+            form.reset('password')
+        },
+    })
+}
 </script>
 
 <template>
     <GuestLayout>
+        <div class="px-6 mt-14">
+
         <Head title="Log in" />
 
         <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
             {{ status }}
         </div>
+
+
+            <div class="text-center space-y-3">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10">
+                    <ApplicationLogo />
+                </div>
+
+                <div class="space-y-2">
+                    <h1 class="text-3xl font-bold text-gray-900">
+                        Welcome Back
+                    </h1>
+
+                    <p class="text-sm text-gray-500 leading-relaxed">
+                        Login to access your timetable, download past questions,
+                        manage your classes and receive important school updates
+                        from myUniAlly.
+                    </p>
+
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        New here? Click create account below and get started in
+                        less than 10 seconds.
+                    </p>
+                </div>
+            </div>
 
         <form @submit.prevent="submit">
             <div>
@@ -95,6 +135,17 @@ const submit = () => {
                     Log in
                 </PrimaryButton>
             </div>
+            <p class="flex mt-4 flex-col items-center justify-between text-sm text-gray-600">
+                Don’t have an account?
+                <Link
+                    href="/register"
+                    class="text-primary font-semibold hover:underline">
+                    Create account
+                </Link>
+            </p>
         </form>
+
+
+        </div>
     </GuestLayout>
 </template>

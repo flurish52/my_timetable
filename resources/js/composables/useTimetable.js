@@ -1,62 +1,53 @@
 /**
  * useTimetable.js
  *
- * Derives all UI-facing schedule state from the raw timetable JSON.
- * Components never touch the raw data directly — they consume what this
- * composable exposes.
+ * Derives all UI-facing schedule state from the new API timetable array.
  */
 
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 
 const now = ref(Date.now())
-
 let timer = null
 
 function startClock() {
-    timer = setInterval(() => {
-        now.value = Date.now()
-    }, 1000)
+    timer = setInterval(() => { now.value = Date.now() }, 1000)
 }
-
 function stopClock() {
     if (timer) clearInterval(timer)
 }
 
-// ─── Colour palette cycling ───────────────────────────────────────────────────
-// Maps each unique course name encountered to a rotating colour token.
-// This way colours are consistent per course across the whole day.
+// ─── Colour palette ───────────────────────────────────────────────────────────
 const COLOUR_TOKENS = ['primary', 'secondary', 'tertiary']
 const courseColourCache = {}
 let colourIndex = 0
 
-function colourForCourse(name) {
-    if (!courseColourCache[name]) {
-        courseColourCache[name] = COLOUR_TOKENS[colourIndex % COLOUR_TOKENS.length]
+function colourForCourse(code) {
+    if (!courseColourCache[code]) {
+        courseColourCache[code] = COLOUR_TOKENS[colourIndex % COLOUR_TOKENS.length]
         colourIndex++
     }
-    return courseColourCache[name]
+    return courseColourCache[code]
 }
 
 // ─── Time helpers ─────────────────────────────────────────────────────────────
 
-/** Convert "HH:MM" string → total minutes since midnight */
+/** "HH:MM:SS" or "HH:MM" → total minutes since midnight */
 function toMinutes(timeStr) {
     const [h, m] = timeStr.split(':').map(Number)
     return h * 60 + m
 }
 
-/** Convert total minutes → "H:MM AM/PM" display string */
+/** "HH:MM:SS" → "H:MM AM/PM" */
 function toDisplayTime(timeStr) {
     const [h, m] = timeStr.split(':').map(Number)
     const period = h >= 12 ? 'PM' : 'AM'
     const hour   = h % 12 === 0 ? 12 : h % 12
-    const min    = m.toString().padStart(2, '0')
-    return `${hour}:${min} ${period}`
+    return `${hour}:${m.toString().padStart(2, '0')} ${period}`
 }
 
-/** Current day key e.g. "monday" */
+/** Current day as capitalized full name e.g. "Monday" */
 function todayKey() {
-    return ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][
+    return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][
         new Date().getDay()
         ]
 }
@@ -67,90 +58,75 @@ function nowMinutes() {
     return n.getHours() * 60 + n.getMinutes()
 }
 
-// ─── Progress calculation ─────────────────────────────────────────────────────
-
-function lectureProgress(slot) {
-    const start = toMinutes(slot.start)
-    const end   = toMinutes(slot.end)
-    const now   = nowMinutes()
-    if (now <= start) return 0
-    if (now >= end)   return 100
-    return Math.round(((now - start) / (end - start)) * 100)
-}
-
-// ─── Status derivation ────────────────────────────────────────────────────────
+// ─── Status & progress ────────────────────────────────────────────────────────
 
 function slotStatus(slot) {
-    const start = toMinutes(slot.start)
-    const end   = toMinutes(slot.end)
-    const now   = nowMinutes()
-    if (now >= start && now < end) return 'ongoing'
-    if (now < start)               return 'upcoming'
+    const start = toMinutes(slot.start_time)
+    const end   = toMinutes(slot.end_time)
+    const cur   = nowMinutes()
+    if (cur >= start && cur < end) return 'ongoing'
+    if (cur < start)               return 'upcoming'
     return 'done'
+}
+
+function lectureProgress(slot) {
+    const start = toMinutes(slot.start_time)
+    const end   = toMinutes(slot.end_time)
+    const cur   = nowMinutes()
+    if (cur <= start) return 0
+    if (cur >= end)   return 100
+    return Math.round(((cur - start) / (end - start)) * 100)
 }
 
 // ─── Main composable ──────────────────────────────────────────────────────────
 
-export function useTimetable(rawData) {
-    /** Today's raw slot array (courses + nulls), never undefined */
+export function useTimetable(timetableRef) {
+    /** Only today's slots */
     const todaySlots = computed(() => {
-        if (!rawData.value) return []
-        return rawData.value.timetable[todayKey()] ?? []
+        if (!timetableRef.value?.length) return []
+        return timetableRef.value.filter(s => s.day_of_week.toLowerCase() === todayKey().toLowerCase())
     })
 
-    /** Only slots that actually have a course (nulls are free periods) */
-    const todayCourses = computed(() =>
-        todaySlots.value.filter(s => s.course !== null)
-    )
-
-    /**
-     * Enriched schedule items ready for the UI.
-     * Each item includes: id, time, courseCode, courseName, venue, status, colour, progress (if ongoing)
-     */
+    /** Enriched items for the UI */
     const scheduleItems = computed(() =>
-        todayCourses.value.map((slot, idx) => {
+        todaySlots.value.map(slot => {
             const status = slotStatus(slot)
             return {
-                id:         idx,
-                start:      slot.start,
-                end:        slot.end,
-                time:       toDisplayTime(slot.start),
-                courseName: slot.course,
-                courseCode: slot.code   ?? slot.course,   // fallback to name if code missing
-                venue:      slot.venue  ?? 'Venue TBA',   // fallback if venue missing
+                id:         slot.id,
+                start:      slot.start_time,
+                end:        slot.end_time,
+                time:       toDisplayTime(slot.start_time),
+                endTime:    toDisplayTime(slot.end_time),
+                courseCode: slot.course?.code  ?? '—',
+                courseName: slot.course?.title ?? 'Unknown Course',
+                creditUnit: slot.course?.credit_unit ?? null,
+                venue:      slot.venue    ?? 'Venue TBA',
+                lecturer:   slot.lecturer ?? 'TBA',
+                isElective: !!slot.is_elective_slot,
                 status,
-                colour:     colourForCourse(slot.course),
+                colour:     colourForCourse(slot.course?.code ?? slot.id),
                 progress:   status === 'ongoing' ? lectureProgress(slot) : null,
             }
         })
     )
 
-    /** The currently ongoing lecture (or null if between lectures) */
     const ongoingLecture = computed(() =>
         scheduleItems.value.find(s => s.status === 'ongoing') ?? null
     )
 
-    /** Next upcoming lecture after the ongoing one (or after now if nothing ongoing) */
     const nextLecture = computed(() => {
-        const now = nowMinutes()
-        return scheduleItems.value.find(s => toMinutes(s.start) > now) ?? null
+        const cur = nowMinutes()
+        return scheduleItems.value.find(s => toMinutes(s.start) > cur) ?? null
     })
 
-    /** Count of real lectures today (free periods excluded) */
-    const lectureCount = computed(() => todayCourses.value.length)
+    const lectureCount = computed(() => todaySlots.value.length)
 
-    /** Only upcoming + ongoing items shown in the schedule list */
     const upcomingItems = computed(() =>
         scheduleItems.value.filter(s => s.status !== 'done')
     )
 
-    onMounted(() => {
-        startClock()
-    })
-
-    onUnmounted(() => {
-        stopClock()
-    })
+    onMounted(startClock)
+    onUnmounted(stopClock)
 
     return {
         scheduleItems,

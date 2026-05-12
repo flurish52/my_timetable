@@ -15,10 +15,20 @@ export async function setupNotifications() {
     })
     if (!token) return
 
+
+    let deviceId = localStorage.getItem('device_id')
+
+    if (!deviceId) {
+        deviceId = crypto.randomUUID()
+        localStorage.setItem('device_id', deviceId)
+    }
+
     const csrf = document.querySelector('meta[name="csrf-token"]').content
 
     await axios.post('/store-token', {
-        token: token
+        token: token,
+        platform: 'web',
+        device_id: deviceId
     }, {
         headers: {
             'X-CSRF-TOKEN': csrf

@@ -8,13 +8,17 @@ defineProps({
         type: Array,
         required: true,
     },
+    programme: {
+        type: Object,
+        required: true,
+    },
 })
 </script>
 
 <template>
     <div class="mx-5 mt-4 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <p class="text-sm text-amber-700 bg-amber-50 border-l-4 border-amber-500 px-3 py-2">
-        Please note that this timetable is for Edu Biology students ONLY! </p>
+        Please note that this timetable is for {{programme.name}} students ONLY! </p>
 
         <!-- Header -->
         <div class="flex items-center justify-between px-4 pt-4 pb-1">

@@ -1,10 +1,10 @@
 import '../css/app.css';
 import './bootstrap';
 
-import { createInertiaApp } from '@inertiajs/vue3';
-import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { createApp, h } from 'vue';
-import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+import {createInertiaApp} from '@inertiajs/vue3';
+import {resolvePageComponent} from 'laravel-vite-plugin/inertia-helpers';
+import {createApp, h} from 'vue';
+import {ZiggyVue} from '../../vendor/tightenco/ziggy';
 
 const appName = import.meta.env.VITE_APP_NAME || 'myTimeTable';
 
@@ -15,10 +15,22 @@ createInertiaApp({
             `./Pages/${name}.vue`,
             import.meta.glob('./Pages/**/*.vue'),
         ),
-    setup({ el, App, props, plugin }) {
-        return createApp({ render: () => h(App, props) })
+    setup({el, App, props, plugin}) {
+        return createApp({render: () => h(App, props)})
+
             .use(plugin)
             .use(ZiggyVue)
+            .directive('click-outside', {
+                mounted(el, binding) {
+                    el._clickOutside = (e) => {
+                        if (!el.contains(e.target)) binding.value()
+                    }
+                    document.addEventListener('mousedown', el._clickOutside)
+                },
+                unmounted(el) {
+                    document.removeEventListener('mousedown', el._clickOutside)
+                },
+            })
             .mount(el);
     },
     progress: {
@@ -34,13 +46,13 @@ const isBrowserSupported =
     'Notification' in window;
 
 if (isBrowserSupported) {
-    import('firebase/messaging').then(({ getMessaging, onMessage }) => {
+    import('firebase/messaging').then(({getMessaging, onMessage}) => {
         try {
             const messaging = getMessaging();
 
             onMessage(messaging, (payload) => {
                 const title = payload.notification?.title || payload.data?.title || 'Notification';
-                const body  = payload.notification?.body  || payload.data?.body  || 'New Notification!';
+                const body = payload.notification?.body || payload.data?.body || 'New Notification!';
 
                 if (Notification.permission !== 'granted') return;
 

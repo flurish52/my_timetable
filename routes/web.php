@@ -1,32 +1,54 @@
 <?php
 
+use App\Http\Controllers\DeviceTokenController;
 use App\Http\Controllers\PastQuestionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TimeTableController;
-use Illuminate\Foundation\Application;
+use App\Models\Programme;
+use App\Models\TimetableSlot;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    $user = Auth::user();
+    if ($user) {
+        return Inertia::render('PastQuestions', [
+            'timetable' => TimetableSlot::with('programme', 'course', 'level')
+                ->where('programme_id', $user->programme_id)
+                ->where('level_id', $user->leve_id)
+                ->get(),
+            'user' => $user,
+        ]);
+    } else {
+        return Inertia::render('PastQuestions', []);
+    }
 });
 
+Route::middleware(['auth', 'verified'])->group(function () {
+Route::get('/setup', [ProfileController::class, 'createSetupAccount'])->name('setup.index');
+Route::put('/setup', [ProfileController::class, 'storeSetUpAccount'])->name('setup.store');
+});
 
-    Route::get('/full_timetable', [TimeTableController::class, 'index'])->name('view.full_timetable');
+Route::middleware(['auth', 'verified', 'profile.setup'])->group(callback: function () {
+    Route::get('/dashboard', function () {
+        $user = Auth::user();
+        return Inertia::render('Welcome', [
+            'timetable' => TimetableSlot::with('programme', 'course')
+                ->where('programme_id', $user->programme_id)
+                ->where('level_id', $user->level_id)
+                ->get(),
+            'user' => $user,
+            'programme' => Programme::where('id', $user->programme_id)->first()
+        ]);
+    })->name('dashboard');
+    Route::get('/full_timetable', [TimeTableController::class, 'index'])->name('view.full_timetable')
+    ->name('view.past_questions_per_course');
     Route::get('/pastquestions', [PastQuestionController::class, 'index'])->name('view.past_questions');
-    Route::get('/pastquestions/{course_title}', [PastQuestionController::class, 'showCoursePapers'])
-        ->name('view.past_questions_per_course');
+    Route::get('/pastquestions/{course_title}', [PastQuestionController::class, 'showCoursePapers']);
+Route::post('/store-token', [DeviceTokenController::class, 'store'])->name('save-token');
+});
 
-
-
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -35,22 +57,4 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Route::post('/store-token', function () {
-    $file = storage_path('app/fcm_tokens.json');
-
-    $tokens = file_exists($file)
-        ? json_decode(file_get_contents($file), true)
-        : [];
-
-    $newToken = request('token');
-
-    if (!in_array($newToken, $tokens)) {
-        $tokens[] = $newToken;
-    }
-
-    file_put_contents($file, json_encode($tokens));
-
-    return response()->json(['ok' => true]);
-});
-
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

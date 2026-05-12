@@ -1,13 +1,13 @@
 <template>
-    <div v-if="!isInstalled && canInstall" :class="[`flex items-center justify-between p-4 bg-white shadow`,
+    <div v-if="!isInstalled && canInstall"
+         :class="[`flex items-center justify-between p-2`,
             isInstalled? 'hidden' : ''
 ]">
-<!--        <span class="font-bold text-blue-600">MyTimetable</span>-->
         <div>
             <button
                 v-if="canInstall"
                 @click="installApp"
-                class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                class="flex items-center gap-2 px-2 py-2 bg-green-500 text-white rounded-lg hover:bg-primary/50 text-sm transition"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                      viewBox="0 0 24 24" stroke="currentColor">

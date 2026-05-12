@@ -30,8 +30,8 @@ export default defineConfig({
                 navigateFallback: null,
             },
             manifest: {
-                name: 'myTimetable',
-                short_name: 'myTimetable',
+                name: 'myUniAlly',
+                short_name: 'myUniAlly',
                 start_url: '/',
                 scope: '/',
                 display: 'standalone',

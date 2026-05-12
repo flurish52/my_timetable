@@ -9,4 +9,8 @@ class TimeTable extends Model
 {
     /** @use HasFactory<\Database\Factories\TimeTableFactory> */
     use HasFactory;
+
+
+
+
 }

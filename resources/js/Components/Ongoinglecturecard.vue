@@ -76,13 +76,6 @@ defineProps({
                     </template>
                     <span v-else class="text-white/60 italic text-xs">No more lectures today</span>
                 </div>
-
-                <button class="flex items-center gap-1 text-white text-sm font-semibold bg-white/15 hover:bg-white/25 transition-colors px-3 py-1.5 rounded-xl">
-<!--                    View details-->
-<!--                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">-->
-<!--                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />-->
-<!--                    </svg>-->
-                </button>
             </div>
 
         </template>
