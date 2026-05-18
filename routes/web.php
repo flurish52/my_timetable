@@ -25,6 +25,8 @@ Route::get('/', function () {
     }
 });
 
+Route::post('/store-token', [DeviceTokenController::class, 'store'])->name('save-token');
+
 Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/setup', [ProfileController::class, 'createSetupAccount'])->name('setup.index');
 Route::put('/setup', [ProfileController::class, 'storeSetUpAccount'])->name('setup.store');
@@ -46,12 +48,12 @@ Route::middleware(['auth', 'verified', 'profile.setup'])->group(callback: functi
     ->name('view.past_questions_per_course');
     Route::get('/pastquestions', [PastQuestionController::class, 'index'])->name('view.past_questions');
     Route::get('/pastquestions/{course_title}', [PastQuestionController::class, 'showCoursePapers']);
-Route::post('/store-token', [DeviceTokenController::class, 'store'])->name('save-token');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
 });
 
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });

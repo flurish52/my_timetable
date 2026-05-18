@@ -1,6 +1,6 @@
 <template>
     <!-- Header bar -->
-    <div class="flex items-center justify-between p-1 shadow">
+    <div class="flex items-center justify-between p-1">
             <span class="font-bold text-blue-600 text-lg tracking-tight">
                 <InstallPWA/>
             </span>

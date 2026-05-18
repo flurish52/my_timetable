@@ -30,24 +30,18 @@ import { ref, onMounted } from 'vue'
 import { setupNotifications } from '@/composables/useNotifications'
     const showPrompt = ref(false)
 
-    onMounted(() => {
-        const lastShown = localStorage.getItem('notif_prompt_last_shown')
-        const now = Date.now()
 
-        const sevenDays = 7 * 24 * 60 * 60 * 1000
+onMounted(() => {
+    if (Notification.permission === 'denied') return
 
-        const shouldShow =
-            !lastShown || (now - parseInt(lastShown)) > sevenDays
+    const lastShown = localStorage.getItem('notif_prompt_last_shown')
+    const sevenDays = 7 * 24 * 60 * 60 * 1000
 
-        if (Notification.permission === 'default' && shouldShow) {
-                    Notification.requestPermission().then(permission => {
-                        if (permission === 'granted') {
-                            console.log('Notifications enabled')
-                        }
-                    })
-            localStorage.setItem('notif_prompt_last_shown', now.toString())
-        }
-    })
+    if (!lastShown || (Date.now() - parseInt(lastShown)) > sevenDays) {
+        setupNotifications()
+        localStorage.setItem('notif_prompt_last_shown', Date.now().toString())
+    }
+})
 
 async function enable() {
     await setupNotifications()

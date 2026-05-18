@@ -29,7 +29,7 @@
                         <!-- Description -->
                         <p class="m-0 mb-4 text-[0.95rem] text-gray-500 leading-relaxed">
                             Browse real past question papers from
-                            <span class="font-medium text-gray-800">Federal College of Obudu</span>
+                            <span class="font-medium text-gray-800">Federal College of Education, Obudu</span>
                             with answers and walk into every exam knowing exactly what to expect,
                             not just hoping for the best.
                         </p>

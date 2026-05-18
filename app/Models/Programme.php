@@ -14,4 +14,18 @@ class Programme extends Model
     {
         return $this->hasMany(Timetable::class);
     }
+    public function programme_type()
+    {
+        return $this->belongsTo(ProgrammeType::class);
+    }
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    protected $fillable = [
+        'department_id',
+        'programme_type_id',
+        'name',
+    ];
 }

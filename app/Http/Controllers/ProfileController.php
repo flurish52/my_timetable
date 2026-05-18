@@ -27,6 +27,8 @@ class ProfileController extends Controller
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
+            'user' => User::with('programme.department','programme.programme_type',  'level')
+                ->where('id', Auth::id())->first(),
         ]);
     }
 
@@ -34,7 +36,7 @@ class ProfileController extends Controller
     {
         return Inertia::render('Profile/Setup', [
             'user' => User::with(['programme', 'level'])
-            ->where('id', Auth::id())->get(),
+            ->where('id', Auth::id())->first(),
             'schools' => School::with('departments')->get(),
             'departments' => Department::all(),
             'programmeTypes' => ProgrammeType::all(),

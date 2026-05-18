@@ -6,6 +6,7 @@ import {onMounted} from "vue";
 import LoginNav from "@/Components/LoginNav.vue";
 import AuthHeader from "@/Components/AuthHeader.vue";
 import { usePage } from '@inertiajs/vue3'
+import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 const page = usePage()
 
 
@@ -25,8 +26,8 @@ onMounted(() => {
 
     <div
         class="sticky top-0 z-50 px-8 bg-primary text-lg flex justify-between items-center text-center w-full font-semibold text-white tracking-wide py-1 shadow-sm">
-        <div>
-            my<span class="text-secondary font-bold">UniAlly</span>
+        <div class="w-8 h-8 inline-flex items-center justify-center rounded-2xl bg-primary/10 rounded-md">
+            <ApplicationLogo class="w-8 h-8 rounded-md" />
         </div>
         <nav>
             <div v-if="!$page.props.auth?.user">
