@@ -1,34 +1,27 @@
 <script setup>
-import { usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 
-const page = usePage()
-
-const currentUrl = computed(() => {
-    return window.location.href
-})
+const currentUrl = computed(() => window.location.href)
 
 async function share() {
-    async function share() {
-        const shareData = {
-            title: 'myUniAlly',
-            text: 'Stop using paper timetables. Get your class timetable, daily lectures, and past questions in one place with myUniAllyApp.',
-            url: currentUrl.value,
-        }
+    const shareData = {
+        title: 'myUniAlly',
+        text: 'Stop using paper timetables. Get your class timetable, daily lectures, and past questions in one place with myUniAlly.',
+        url: currentUrl.value,
+    }
 
-        try {
-            if (navigator.share) {
-                await navigator.share(shareData)
-            } else {
-                await navigator.clipboard.writeText(
-                    `${shareData.text}\n\n${shareData.url}`
-                )
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData)
+        } else {
+            await navigator.clipboard.writeText(
+                `${shareData.text}\n\n${shareData.url}`
+            )
 
-                alert('Share message copied to clipboard!')
-            }
-        } catch (error) {
-            console.log(error)
+            alert('Share message copied to clipboard!')
         }
+    } catch (error) {
+        console.log(error)
     }
 }
 </script>
