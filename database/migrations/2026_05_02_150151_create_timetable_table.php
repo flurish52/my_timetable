@@ -13,17 +13,31 @@ return new class extends Migration
     {
         Schema::create('timetable', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('level_id')
+
+            $table->foreignId('school_id')
                 ->constrained()
                 ->cascadeOnDelete();
+
+            $table->foreignId('course_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
             $table->string('day_of_week');
             $table->time('start_time');
             $table->time('end_time');
-            $table->foreignId('course_id')->constrained()->onDelete('cascade');
+
             $table->string('venue')->nullable();
             $table->string('lecturer')->nullable();
-            $table->boolean('is_elective_slot')->default(false);
+
             $table->timestamps();
+
+            $table->unique([
+                'course_id',
+                'day_of_week',
+                'start_time',
+                'end_time',
+                'venue',
+            ]);
         });
     }
 

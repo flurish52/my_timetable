@@ -1,11 +1,10 @@
 <?php
 
 use App\Http\Controllers\DeviceTokenController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PastQuestionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TimeTableController;
-use App\Models\Programme;
-use App\Models\TimetableSlot;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -14,10 +13,6 @@ Route::get('/', function () {
     $user = Auth::user();
     if ($user) {
         return Inertia::render('PastQuestions', [
-            'timetable' => TimetableSlot::with('programme', 'course', 'level')
-                ->where('programme_id', $user->programme_id)
-                ->where('level_id', $user->leve_id)
-                ->get(),
             'user' => $user,
         ]);
     } else {
@@ -33,17 +28,7 @@ Route::put('/setup', [ProfileController::class, 'storeSetUpAccount'])->name('set
 });
 
 Route::middleware(['auth', 'verified', 'profile.setup'])->group(callback: function () {
-    Route::get('/dashboard', function () {
-        $user = Auth::user();
-        return Inertia::render('Welcome', [
-            'timetable' => TimetableSlot::with('programme', 'course')
-                ->where('programme_id', $user->programme_id)
-                ->where('level_id', $user->level_id)
-                ->get(),
-            'user' => $user,
-            'programme' => Programme::where('id', $user->programme_id)->first()
-        ]);
-    })->name('dashboard');
+    Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
     Route::get('/full_timetable', [TimeTableController::class, 'index'])->name('view.full_timetable');
     Route::get('/pastquestions', [PastQuestionController::class, 'index'])->name('view.past_questions');
     Route::get('/pastquestions/{course_title}', [PastQuestionController::class, 'showCoursePapers'])

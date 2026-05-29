@@ -35,7 +35,7 @@ onMounted(() => {
     if (Notification.permission === 'denied') return
 
     const lastShown = localStorage.getItem('notif_prompt_last_shown')
-    const sevenDays = 7 * 24 * 60 * 60 * 1000
+    const sevenDays = 3 * 24 * 60 * 60 * 1000
 
     if (!lastShown || (Date.now() - parseInt(lastShown)) > sevenDays) {
         setupNotifications()

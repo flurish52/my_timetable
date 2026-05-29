@@ -3,15 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\CourseOffering;
+use App\Models\Programme;
 use App\Models\StudentElective;
-use App\Models\TimeTable;
-use App\Http\Requests\StoreTimeTableRequest;
-use App\Http\Requests\UpdateTimeTableRequest;
 use App\Models\TimetableSlot;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
-class TimeTableController extends Controller
+class HomeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,21 +18,35 @@ class TimeTableController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $baseOfferings = CourseOffering::where('programme_id', $user->programme_id)
+
+        // Core + general offerings
+        $offeringCourseIds = CourseOffering::where('programme_id', $user->programme_id)
             ->where('level_id', $user->level_id)
-            ->get();
-        $electives = StudentElective::where('student_id', $user->id)
-            ->pluck('course_offering_id');
-        $allowedOfferingIds = $baseOfferings->pluck('id')
-            ->merge($electives)
-            ->unique();
-        $courseIds = CourseOffering::whereIn('id', $allowedOfferingIds)
+            ->where('type', 'core')
             ->pluck('course_id');
+
+        // Student electives
+        $electiveOfferingIds = StudentElective::where('student_id', $user->id)
+            ->pluck('course_offering_id');
+
+        $electiveCourseIds = CourseOffering::whereIn('id', $electiveOfferingIds)
+            ->pluck('course_id');
+
+        // Merge all courses
+        $courseIds = $offeringCourseIds
+            ->merge($electiveCourseIds)
+            ->unique();
+
+        // Timetable
         $timetable = TimetableSlot::with('course')
             ->whereIn('course_id', $courseIds)
             ->get();
-        return inertia::render('FullTimeTable', [
+
+//        dd($timetable);
+
+        return Inertia::render('Welcome', [
             'timetable' => $timetable,
+            'programme' => Programme::where('id', $user->programme_id)->first(),
             'user' => $user,
         ]);
     }
@@ -49,7 +62,7 @@ class TimeTableController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreTimeTableRequest $request)
+    public function store(Request $request)
     {
         //
     }
@@ -57,7 +70,7 @@ class TimeTableController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(TimeTable $timeTable)
+    public function show(string $id)
     {
         //
     }
@@ -65,7 +78,7 @@ class TimeTableController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(TimeTable $timeTable)
+    public function edit(string $id)
     {
         //
     }
@@ -73,7 +86,7 @@ class TimeTableController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateTimeTableRequest $request, TimeTable $timeTable)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -81,7 +94,7 @@ class TimeTableController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(TimeTable $timeTable)
+    public function destroy(string $id)
     {
         //
     }
