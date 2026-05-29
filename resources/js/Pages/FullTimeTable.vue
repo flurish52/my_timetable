@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import GuestLayout from "@/Layouts/GuestLayout.vue";
+import {Head} from "@inertiajs/vue3";
 
 const props = defineProps({
     timetable: {
@@ -104,6 +105,7 @@ function isOngoingRow(hourSlot) {
 
 <template>
     <GuestLayout>
+        <Head title="Full timetable" />
         <div class="flex px-4 md:px-12 flex-col h-full bg-white">
 
             <header class="flex justify-between items-center w-full bg-white border-b px-4 py-3 sticky top-0 z-40 shadow-sm">

@@ -13,8 +13,6 @@ return new class extends Migration
     {
         Schema::create('timetable', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('programme_id')
-                ->constrained()->onDelete('cascade');        // Linked to Year now
             $table->foreignId('level_id')
                 ->constrained()
                 ->cascadeOnDelete();

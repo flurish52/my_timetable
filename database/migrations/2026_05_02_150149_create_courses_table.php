@@ -16,10 +16,6 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->string('title');
             $table->integer('credit_unit')->default(2);
-            $table->foreignId('programme_id')
-                ->nullable()
-                ->constrained()
-                ->onDelete('set null');
             $table->timestamps();
         });
     }

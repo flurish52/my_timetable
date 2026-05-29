@@ -1,5 +1,6 @@
 <template>
     <GuestLayout>
+        <Head title="Dashboard" />
         <div class="md:p-4">
             <Dashboardhome
             :timetable="timetable"
@@ -13,6 +14,7 @@
 <script setup>
 import Dashboardhome from "@/Components/Dashboardhome.vue";
 import GuestLayout from "@/Layouts/GuestLayout.vue";
+import {Head} from "@inertiajs/vue3";
 
 const props = defineProps({
     timetable: {

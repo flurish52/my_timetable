@@ -44,10 +44,10 @@ Route::middleware(['auth', 'verified', 'profile.setup'])->group(callback: functi
             'programme' => Programme::where('id', $user->programme_id)->first()
         ]);
     })->name('dashboard');
-    Route::get('/full_timetable', [TimeTableController::class, 'index'])->name('view.full_timetable')
-    ->name('view.past_questions_per_course');
+    Route::get('/full_timetable', [TimeTableController::class, 'index'])->name('view.full_timetable');
     Route::get('/pastquestions', [PastQuestionController::class, 'index'])->name('view.past_questions');
-    Route::get('/pastquestions/{course_title}', [PastQuestionController::class, 'showCoursePapers']);
+    Route::get('/pastquestions/{course_title}', [PastQuestionController::class, 'showCoursePapers'])
+        ->name('view.past_questions_per_course');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
 });

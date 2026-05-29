@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import {Head, useForm} from '@inertiajs/vue3'
 import GuestLayout from "@/Layouts/GuestLayout.vue";
 
 const props = defineProps({
@@ -55,6 +55,7 @@ const submit = () => {
 
 <template>
     <GuestLayout>
+        <Head title="Setup" />
         <div class="flex items-center justify-center bg-gray-50 p-4">
             <div class="w-full max-w-xl bg-white rounded-xl shadow-md p-4 border border-gray-100">
 

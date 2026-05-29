@@ -13,8 +13,6 @@ return new class extends Migration
     {
         Schema::create('levels', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('programme_id')
-                ->constrained()->onDelete('cascade');
             $table->string('name');
             $table->string('position')->default(0);
             $table->timestamps();

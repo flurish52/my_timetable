@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('course_id')->constrained()->cascadeOnDelete();
             $table->foreignId('programme_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('level_id')->constrained()->cascadeOnDelete();
             $table->boolean('is_core')->default(false);
             $table->boolean('is_elective')->default(false);
             $table->boolean('is_general')->default(false);

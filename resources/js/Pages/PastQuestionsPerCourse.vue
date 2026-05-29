@@ -1,6 +1,6 @@
 <template>
     <GuestLayout>
-
+        <Head :title="`${course_title} Pastquestions`" />
     <div class="min-h-screen flex items-start justify-center bg-[var(--color-bg,#f5f7fa)] font-inherit">
 
         <div
@@ -148,6 +148,7 @@
 import {ref, computed, onMounted} from 'vue'
 import BackButton from "../Components/BackButton.vue";
 import GuestLayout from "@/Layouts/GuestLayout.vue";
+import {Head} from "@inertiajs/vue3";
 
 const props = defineProps({
     course_title: {

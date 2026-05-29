@@ -14,7 +14,6 @@ class TimetableSlot extends Model
 
 
     protected $fillable = [
-        'programme_id',
         'course_id',
         'day_of_week',
         'start_time',
