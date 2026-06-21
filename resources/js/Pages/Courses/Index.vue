@@ -64,8 +64,6 @@ const handleRemove = (enrollmentId) => {
 
 <template>
     <GuestLayout>
-
-        {{ generals }}
         <div class="min-h-screen bg-gray-50 px-4 py-8">
             <div class="max-w-5xl mx-auto space-y-10">
 
