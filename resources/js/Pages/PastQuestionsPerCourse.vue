@@ -1,220 +1,221 @@
 <template>
     <GuestLayout>
-        <Head :title="`${course_title} Pastquestions`" />
-    <div class="min-h-screen flex items-start justify-center bg-[var(--color-bg,#f5f7fa)] font-inherit">
+        <Head :title="`${ past_question.title }- Past questions`" />
+        <div class="min-h-screen flex items-start justify-center bg-[var(--color-bg,#f5f7fa)] font-inherit">
+            <div class="w-full max-w-[680px] bg-[var(--color-surface,#fff)] border border-[var(--color-border,#e2e8f0)] rounded-2xl p-8 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+                <BackButton route="/pastquestions" />
 
-        <div
-            class="w-full max-w-[680px] bg-[var(--color-surface,#fff)] border border-[var(--color-border,#e2e8f0)] rounded-2xl p-8 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
-                <BackButton route="/pastquestions"/>
+                <!-- Header -->
+                <div class="mb-7">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-[0.7rem] font-semibold tracking-widest uppercase text-primary/60">Past Questions</span>
+                    </div>
+                    <h1 class="m-0 mb-1 text-[1.5rem] font-bold text-[var(--color-text,#1a202c)] leading-tight">
+                        {{ past_question.code }}
+                        <span class="font-normal text-gray-400">·</span>
+                        {{ past_question.title }}
+                    </h1>
+                    <p class="m-0 mt-1.5 text-sm text-[var(--color-muted,#718096)] leading-relaxed">
+                        Practice with real exam papers. Understand patterns, boost confidence.
+                    </p>
+                </div>
 
-            <!-- Header -->
-            <div class="mb-6">
-                <h1 class="m-0 mb-1 text-[1.4rem] font-bold text-[var(--color-text,#1a202c)]">{{course.course_title}} Past Questions</h1>
-                <p class="m-0 text-sm text-[var(--color-muted,#718096)]">Browse and download available past question on {{course.course_title}}
-                    papers</p>
-
-            </div>
-
-            <!-- Search -->
-            <div class="relative mb-5">
-                <span
-                    class="absolute left-[0.85rem] top-1/2 -translate-y-1/2 flex pointer-events-none text-[var(--color-muted,#a0aec0)]">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="2.5">
-                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                    </svg>
-                </span>
-                <input
-                    v-model="query"
-                    type="text"
-                    placeholder="Search files..."
-                    class="w-full box-border py-[0.65rem] pr-10 pl-[2.4rem] border-[1.5px] border-[var(--color-border,#e2e8f0)] rounded-[0.6rem] text-[0.925rem] bg-[var(--color-bg,#f8fafc)] text-[var(--color-text,#1a202c)] outline-none transition-[border-color,box-shadow] duration-200 font-inherit focus:border-[var(--color-primary,#3b82f6)] focus:bg-[var(--color-surface,#fff)]"
-                />
-                <button
-                    v-if="query"
-                    @click="query = ''"
-                    class="absolute right-[0.85rem] top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer flex p-[2px] rounded-full text-[var(--color-muted,#a0aec0)] transition-colors duration-150 hover:text-[var(--color-text,#1a202c)]"
-                >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="2.5">
-                        <path d="M18 6 6 18M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Loading -->
-            <div v-if="loading"
-                 class="flex flex-col items-center gap-3 py-12 px-4 text-[var(--color-muted,#a0aec0)] text-[0.9rem]">
-                <div
-                    class="w-7 h-7 border-[3px] border-[var(--color-border,#e2e8f0)] border-t-[var(--color-primary,#3b82f6)] rounded-full animate-spin"></div>
-                <span>Loading files…</span>
-            </div>
-
-            <!-- Error -->
-            <div v-else-if="error"
-                 class="flex flex-col items-center gap-3 py-12 px-4 text-[var(--color-danger,#e53e3e)] text-[0.9rem]">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 8v4m0 4h.01"/>
-                </svg>
-                <span>{{ error }}</span>
-            </div>
-
-            <!-- Empty -->
-            <div v-else-if="filtered.length === 0"
-                 class="flex flex-col items-center gap-3 py-12 px-4 text-[var(--color-muted,#a0aec0)] text-[0.9rem]">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                </svg>
-                <span>No files found</span>
-            </div>
-
-            <!-- File List -->
-            <ul v-else class="list-none m-0 p-0">
-                <li
-                    v-for="(file, i) in filtered"
-                    :key="file.name"
-                    class="flex items-center gap-4 py-[0.9rem] border-b border-[var(--color-border,#f0f4f8)] last:border-b-0 animate-[fadeUp_0.35s_ease_both] border-b-2 border-primary/20"
-                    :style="{ animationDelay: `${i * 40}ms` }"
-                >
-                    <!-- File icon based on type -->
-                    <span
-                        class="shrink-0 w-12 h-12 p-0 rounded-lg flex items-center justify-center"
-                        :class="[
-                            ['docx','doc'].includes(ext(file.name))
-                                ? 'bg-[color-mix(in_srgb,var(--color-secondary,#0ea5e9)_12%,transparent)] text-[var(--color-secondary,#0ea5e9)]'
-                                : ['xlsx','xls'].includes(ext(file.name))
-                                    ? 'bg-[color-mix(in_srgb,var(--color-tertiary,#10b981)_12%,transparent)] text-[var(--color-tertiary,#10b981)]'
-                                    : 'bg-[color-mix(in_srgb,var(--color-primary,#3b82f6)_10%,transparent)] text-[var(--color-primary,#3b82f6)]'
-                        ]"
-                    >
-                        <svg width="32" height="32" viewBox="0 0 22 22" fill="none" stroke="currentColor"
-                             stroke-width="1.8">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline
-                            points="14 2 14 8 20 8"/>
+                <!-- Search -->
+                <div class="relative mb-6">
+                    <span class="absolute left-[0.85rem] top-1/2 -translate-y-1/2 flex pointer-events-none text-[var(--color-muted,#a0aec0)]">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
                         </svg>
                     </span>
+                    <input
+                        v-model="query"
+                        type="text"
+                        placeholder="Search by session or title..."
+                        class="w-full box-border py-[0.65rem] pr-10 pl-[2.4rem] border-[1.5px] border-[var(--color-border,#e2e8f0)] rounded-[0.6rem] text-[0.925rem] bg-[var(--color-bg,#f8fafc)] text-[var(--color-text,#1a202c)] outline-none transition-[border-color,box-shadow] duration-200 font-inherit focus:border-primary focus:bg-[var(--color-surface,#fff)]"
+                    />
+                    <button
+                        v-if="query"
+                        @click="query = ''"
+                        class="absolute right-[0.85rem] top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer flex p-[2px] rounded-full text-[var(--color-muted,#a0aec0)] transition-colors duration-150 hover:text-[var(--color-text,#1a202c)]"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M18 6 6 18M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
 
-                    <div :title="label(file.name)" class="flex-1 min-w-0 flex flex-col gap-1">
-                        <span
-                            class="font-semibold text-[0.95rem] text-[var(--color-text,#1a202c)] whitespace-nowrap overflow-hidden text-ellipsis">
-                            {{ label(file.name) }} past questions
-                        </span>
-
-
-                        <div class="flex justify-between">
-                        <span class="flex items-center gap-2">
-                            <span
-                                class="text-[0.7rem] font-bold tracking-[0.04em] px-[0.45rem] py-[0.1rem] rounded-[0.3rem] bg-[color-mix(in_srgb,var(--color-primary,#3b82f6)_12%,transparent)] text-[var(--color-primary,#3b82f6)]">
-                                {{ ext(file.name).toUpperCase() }}
-                            </span>
-                            <span v-if="file.size"
-                                  class="text-[0.75rem] text-[var(--color-muted,#a0aec0)]">
-                                {{ formatSize(file.size) }}
-                            </span>
-                        </span>
-                            <a
-                                class="shrink-0 inline-flex items-center gap-[0.45rem] px-4 py-2 bg-primary text-white rounded-lg text-[0.85rem] font-semibold no-underline transition-[opacity,transform] duration-150 hover:opacity-90 hover:-translate-y-px active:opacity-100 active:translate-y-0 font-inherit"
-                                :href="`/past_questions/${file.name}`"
-                                :download="file.name"
-                            >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                     stroke-width="2.5">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                    <polyline points="7 10 12 15 17 10"/>
-                                    <line x1="12" y1="15" x2="12" y2="3"/>
-                                </svg>
-                                <span class="">
-                        Download
-                        </span>
-                            </a>
-                        </div>
+                <!-- Empty -->
+                <div v-if="filtered.length === 0"
+                     class="flex flex-col items-center gap-3 py-14 px-4 text-[var(--color-muted,#a0aec0)] text-[0.9rem]">
+                    <div class="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-1">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-gray-400">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
                     </div>
+                    <span class="font-medium text-gray-500">No past questions found</span>
+                    <span class="text-xs text-gray-400">Try a different session or keyword</span>
+                </div>
 
-                </li>
-            </ul>
+                <!-- Paper List -->
+                <ul v-else class="list-none m-0 p-0 flex flex-col gap-3">
+                    <li
+                        v-for="(paper, i) in filtered"
+                        :key="paper.id"
+                        class="group relative rounded-xl border border-[var(--color-border,#e8edf2)] bg-white hover:border-primary/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.07)] transition-all duration-200 animate-[fadeUp_0.35s_ease_both] overflow-hidden"
+                        :style="{ animationDelay: `${i * 50}ms` }"
+                    >
+                        <!-- Top accent bar -->
+                        <div class="h-[3px] w-full bg-gradient-to-r from-primary/60 via-primary to-primary/40"></div>
 
-            <p v-if="!loading && !error && course.files.length"
-               class="mt-4 text-right text-[0.78rem] text-[var(--color-muted,#a0aec0)]">
-                {{ filtered.length }} of {{ course.files.length }} file{{ course.files.length !== 1 ? 's' : '' }}
-            </p>
+                        <div class="flex items-start gap-4 p-4">
+                            <!-- Icon -->
+                            <div class="shrink-0 w-11 h-11 bg-primary/8 text-primary rounded-xl flex items-center justify-center mt-0.5 group-hover:bg-primary/12 transition-colors duration-200">
+                                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <path d="M8 13h6M8 17h4"/>
+                                </svg>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="flex-1 min-w-0">
+
+                                <!-- Title row -->
+                                <div class="flex items-start justify-between gap-2 mb-1">
+                                    <span class="font-semibold text-[0.95rem] text-[var(--color-text,#1a202c)] leading-snug">
+                                        {{ past_question.code }} · {{ paper.session }}
+                                        <span class="font-normal text-gray-400 text-[0.85rem]">— {{ paper.semester.name }} semester</span>
+                                    </span>
+                                </div>
+
+                                <!-- Description -->
+                                <p class="m-0 mb-2.5 text-[0.82rem] text-[var(--color-muted,#718096)] leading-relaxed">
+                                    {{ paper.description }}
+                                </p>
+
+                                <!-- Meta pills row -->
+                                <div class="flex items-center gap-2 flex-wrap mb-3.5">
+                                    <span class="inline-flex items-center gap-1 text-[0.7rem] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                        {{ paper.session }}
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 text-[0.7rem] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-100">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                                        {{ paper.duration_minutes }} mins
+                                    </span>
+                                    <span v-if="paper.instructions"
+                                          class="inline-flex items-center gap-1 text-[0.7rem] text-gray-400 truncate max-w-[220px]"
+                                          :title="paper.instructions">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+                                        {{ paper.instructions }}
+                                    </span>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="flex flex-col md:flex-row items-center justify-between gap-2">
+                                    <a
+                                        v-if="paper.source_file"
+                                        :href="`${paper.source_file}`"
+                                        :download="paper.title"
+                                        class="inline-flex w-full border-2 border-primary items-center gap-1.5 px-4 py-2 border border-[var(--color-border,#e2e8f0)] text-[var(--color-muted,#4a5568)] bg-gray-50 rounded-lg text-[0.82rem] font-semibold no-underline transition-all duration-150 hover:border-primary/40 hover:text-primary hover:bg-primary/5 hover:-translate-y-px active:translate-y-0 font-inherit"
+                                    >
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                            <polyline points="7 10 12 15 17 10"/>
+                                            <line x1="12" y1="15" x2="12" y2="3"/>
+                                        </svg>
+                                        Download
+                                    </a>
+                                   <Link :href="`/pastquestions/${past_question.code}/${paper.id}`"
+                                    class="inline-flex w-full items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-[0.82rem] font-semibold no-underline transition-all duration-150 hover:opacity-90 hover:-translate-y-px active:translate-y-0 font-inherit shadow-[0_2px_8px_rgba(0,0,0,0.12)]"
+                                    >
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <polygon points="5 3 19 12 5 21 5 3"/>
+                                    </svg>
+                                    Start Practice
+                                    </Link>
+
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+                <p v-if="past_question.past_question.length"
+                   class="mt-5 text-right text-[0.78rem] text-[var(--color-muted,#a0aec0)]">
+                    {{ filtered.length }} of {{ past_question.past_question.length }} paper{{ past_question.past_question.length !== 1 ? 's' : '' }}
+                </p>
+            </div>
         </div>
-    </div>
     </GuestLayout>
 </template>
 
 <script setup>
-import {ref, computed, onMounted} from 'vue'
-import BackButton from "../Components/BackButton.vue";
-import GuestLayout from "@/Layouts/GuestLayout.vue";
-import {Head} from "@inertiajs/vue3";
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { Head, router, Link } from '@inertiajs/vue3'
+import BackButton from "@/Components/BackButton.vue"
+import GuestLayout from "@/Layouts/AppLayout.vue"
 
 const props = defineProps({
-    course_title: {
-        type: String,
+    past_question: {
+        type: Object,
         required: true
     }
 })
 
-
-
-const courses = ref([])
 const query = ref('')
-const loading = ref(true)
-const error = ref(null)
-let course  = ref([])
-
-onMounted(async () => {
-    try {
-        const res = await fetch('/past_questions/files.json', {
-            cache: "no-cache"
-        })
-        if (!res.ok) throw new Error(`Could not load file list (${res.status})`)
-        const data = await res.json()
-        courses.value = Array.isArray(data) ? data : data.files ?? []
-        course.value = courses.value.filter(c =>c.course_title === props.course_title)
-        course.value = course.value[0]
-    } catch (e) {
-        error.value = e.message
-    } finally {
-        loading.value = false
-    }
-})
 
 const filtered = computed(() => {
     const q = query.value.trim().toLowerCase()
-    if (!q) return course.value.files
-    return course.value.files.filter(f => f.name.toLowerCase().includes(q))
+
+    const data = props.past_question?.past_question ?? []
+
+    if (!q) return data
+
+    return data.filter(p =>
+        (p.title ?? '').toLowerCase().includes(q) ||
+        (p.session ?? '').toLowerCase().includes(q) ||
+        (p.description ?? '').toLowerCase().includes(q)
+    )
 })
 
-function label(name) {
-    return name
-        .replace(/\.[^.]+$/, '')
-        .replace(/[_-]+/g, ' ')
-        .replace(/\b\w/g, c => c.toUpperCase())
+let interval = null
+
+const hasMissingFiles = () => {
+    const data = props.past_question?.past_question ?? []
+    return data.some(p => p.source_file === null)
 }
 
-function ext(name) {
-    return (name.match(/\.([^.]+)$/) ?? ['', 'file'])[1].toLowerCase()
+const stopPolling = () => {
+    if (interval) {
+        clearInterval(interval)
+        interval = null
+    }
 }
 
-function formatSize(bytes) {
-    if (bytes < 1024) return `${bytes} B`
-    if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`
-    return `${(bytes / 1048576).toFixed(1)} MB`
-}
+onMounted(() => {
+    if (!hasMissingFiles()) return
+
+    interval = setInterval(() => {
+        if (!hasMissingFiles()) {
+            stopPolling()
+            router.reload({ only: ['past_question'] })
+            return
+        }
+
+        router.reload({ only: ['past_question'] })
+    }, 5000)
+})
+
+onUnmounted(() => {
+    stopPolling()
+})
 </script>
 
 <style>
 @keyframes fadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(6px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 </style>

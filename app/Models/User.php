@@ -28,6 +28,11 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Level::class);
     }
+
+    public function electives()
+    {
+        return $this->hasMany(StudentElective::class, 'student_id');
+    }
     protected $fillable = [
         'name',
         'email',
@@ -45,7 +50,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(DeviceToken::class);
     }
-
+    public function questionAttempts()
+    {
+        return $this->hasMany(QuestionAttempt::class);
+    }
     /**
      * The attributes that should be hidden for serialization.
      *

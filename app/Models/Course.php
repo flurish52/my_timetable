@@ -14,4 +14,13 @@ class Course extends Model
     {
         return $this->hasMany(Timetable::class);
     }
+
+    public function course_offering()
+    {
+        return $this->hasMany(CourseOffering::class);
+    }
+    public function past_question()
+    {
+        return $this->hasMany(PastQuestion::class);
+    }
 }

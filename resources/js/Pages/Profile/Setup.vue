@@ -1,7 +1,8 @@
 <script setup>
 import { computed } from 'vue'
-import {Head, useForm} from '@inertiajs/vue3'
-import GuestLayout from "@/Layouts/GuestLayout.vue";
+import { Head, useForm } from '@inertiajs/vue3'
+import GuestLayout from "@/Layouts/AppLayout.vue"
+import SearchableSelect from "@/Components/SearchableSelect.vue"
 
 const props = defineProps({
     user: Object,
@@ -10,8 +11,7 @@ const props = defineProps({
     levels: Array,
 })
 
-// Derive school_id — find which school owns the user's existing department
-const existingDepartmentId = props.user?.programme?.department_id || ''
+const existingDepartmentId    = props.user?.programme?.department_id || ''
 const existingProgrammeTypeId = props.user?.programme?.programme_type_id || ''
 
 const existingSchool = props.schools?.find(s =>
@@ -19,10 +19,10 @@ const existingSchool = props.schools?.find(s =>
 )
 
 const form = useForm({
-    school_id:        existingSchool?.id || '',
-    department_id:    existingDepartmentId,
+    school_id:         existingSchool?.id || '',
+    department_id:     existingDepartmentId,
     programme_type_id: existingProgrammeTypeId,
-    level_id:         props.user?.level_id || '',
+    level_id:          props.user?.level_id || '',
 })
 
 const isUpdate = computed(() => !!props.user?.programme_id)
@@ -33,127 +33,146 @@ const filteredDepartments = computed(() => {
     return school?.departments ?? []
 })
 
+const programmeName = computed(() => {
+    if (!form.department_id || !form.programme_type_id) return ''
+    const dept = filteredDepartments.value.find(d => d.id === Number(form.department_id))
+    const type = props.programmeTypes.find(p => p.id === Number(form.programme_type_id))
+    return dept && type ? `${dept.name} (${type.name})` : ''
+})
+
 const onSchoolChange = () => {
-    form.department_id = ''
+    form.department_id    = ''
     form.programme_type_id = ''
-    form.level_id = ''
+    form.level_id          = ''
 }
 
 const onDepartmentChange = () => {
     form.programme_type_id = ''
-    form.level_id = ''
+    form.level_id          = ''
 }
 
 const onProgrammeTypeChange = () => {
     form.level_id = ''
 }
 
-const submit = () => {
-    form.put('/setup')
-}
+const submit = () => form.put('/setup')
 </script>
 
 <template>
     <GuestLayout>
         <Head title="Setup" />
-        <div class="flex items-center justify-center bg-gray-50 p-4">
-            <div class="w-full max-w-xl bg-white rounded-xl shadow-md p-4 border border-gray-100">
 
-                <h1 class="text-2xl font-semibold text-primary mb-1">
-                    {{ isUpdate ? 'Update Your Profile' : 'Complete Your Profile' }}
-                </h1>
-                <p class="text-gray-500 mb-6">
-                    {{ isUpdate ? 'Update your school details below' : 'Set your school details to continue' }}
-                </p>
+        <div class="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+            <div class="w-full max-w-lg bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
 
+                <!-- Header -->
+                <div class="flex items-center gap-4 mb-7">
+                    <div class="flex items-center justify-center w-11 h-11 rounded-xl bg-primary/10 text-primary shrink-0">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <circle cx="10" cy="6.5" r="3" stroke="currentColor" stroke-width="1.6"/>
+                            <path d="M3 17.5c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-semibold text-gray-900 leading-tight">
+                            {{ isUpdate ? 'Update your profile' : 'Complete your profile' }}
+                        </h1>
+                        <p class="text-sm text-gray-400 mt-0.5">
+                            {{ isUpdate ? 'Edit your school details below' : 'Set your school details to get started' }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-100 mb-7" />
+
+                <!-- Form -->
                 <form @submit.prevent="submit" class="space-y-5">
 
                     <!-- School -->
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">School</label>
-                        <select
+                    <div class="space-y-1.5">
+                        <label class="flex items-center gap-2 text-sm font-medium text-gray-600">
+                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[11px] font-semibold">1</span>
+                            School
+                        </label>
+                        <SearchableSelect
                             v-model="form.school_id"
+                            :options="schools"
+                            placeholder="Select your school"
                             @change="onSchoolChange"
-                            class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                        >
-                            <option value="">Select your school</option>
-                            <option v-for="s in schools" :key="s.id" :value="s.id">
-                                {{ s.name }}
-                            </option>
-                        </select>
+                        />
+                        <p v-if="form.errors.school_id" class="text-xs text-red-500">{{ form.errors.school_id }}</p>
                     </div>
 
-                    <!-- Department — disabled until school picked -->
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">Department</label>
-                        <select
+                    <!-- Department -->
+                    <div class="space-y-1.5">
+                        <label class="flex items-center gap-2 text-sm font-medium text-gray-600">
+                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[11px] font-semibold">2</span>
+                            Department
+                        </label>
+                        <SearchableSelect
                             v-model="form.department_id"
+                            :options="filteredDepartments"
+                            placeholder="Select your department"
                             :disabled="!form.school_id"
+                            :hint="!form.school_id ? 'Select a school first' : ''"
                             @change="onDepartmentChange"
-                            class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        >
-                            <option value="">Select your department</option>
-                            <option v-for="d in filteredDepartments" :key="d.id" :value="d.id">
-                                {{ d.name }}
-                            </option>
-                        </select>
-                        <p v-if="!form.school_id" class="text-xs text-gray-400 mt-1">
-                            Select a school first
-                        </p>
+                        />
+                        <p v-if="form.errors.department_id" class="text-xs text-red-500">{{ form.errors.department_id }}</p>
                     </div>
 
-                    <!-- Programme Type — disabled until department picked -->
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">Programme Type</label>
-                        <select
+                    <!-- Programme Type -->
+                    <div class="space-y-1.5">
+                        <label class="flex items-center gap-2 text-sm font-medium text-gray-600">
+                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[11px] font-semibold">3</span>
+                            Programme type
+                        </label>
+                        <SearchableSelect
                             v-model="form.programme_type_id"
+                            :options="programmeTypes"
+                            placeholder="Select programme type"
                             :disabled="!form.department_id"
+                            :hint="!form.department_id ? 'Select a department first' : ''"
                             @change="onProgrammeTypeChange"
-                            class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        >
-                            <option value="">Select programme type</option>
-                            <option v-for="p in programmeTypes" :key="p.id" :value="p.id">
-                                {{ p.name }}
-                            </option>
-                        </select>
-                        <p v-if="!form.department_id" class="text-xs text-gray-400 mt-1">
-                            Select a department first
-                        </p>
-                        <!-- Preview what programme will be created/used -->
-                        <p v-if="form.department_id && form.programme_type_id" class="text-xs text-primary mt-1 font-medium">
-                            Programme: {{
-                                filteredDepartments.find(d => d.id === Number(form.department_id))?.name
-                            }} ({{
-                                programmeTypes.find(p => p.id === Number(form.programme_type_id))?.name
-                            }})
-                        </p>
+                        />
+                        <!-- Preview badge -->
+                        <div v-if="programmeName" class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
+                            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                                <path d="M5.5 1l1.2 2.4 2.65.39-1.92 1.87.45 2.64L5.5 7.05 3.12 8.3l.45-2.64L1.65 3.79l2.65-.39L5.5 1z" fill="currentColor"/>
+                            </svg>
+                            {{ programmeName }}
+                        </div>
+                        <p v-if="form.errors.programme_type_id" class="text-xs text-red-500">{{ form.errors.programme_type_id }}</p>
                     </div>
 
                     <!-- Level -->
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">Level</label>
-                        <select
+                    <div class="space-y-1.5">
+                        <label class="flex items-center gap-2 text-sm font-medium text-gray-600">
+                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[11px] font-semibold">4</span>
+                            Level
+                        </label>
+                        <SearchableSelect
                             v-model="form.level_id"
+                            :options="levels"
+                            placeholder="Select your level"
                             :disabled="!form.programme_type_id"
-                            class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        >
-                            <option value="">Select your level</option>
-                            <option v-for="l in levels" :key="l.id" :value="l.id">
-                                {{ l.name }}
-                            </option>
-                        </select>
-                        <p v-if="!form.programme_type_id" class="text-xs text-gray-400 mt-1">
-                            Select a programme type first
-                        </p>
+                            :hint="!form.programme_type_id ? 'Select a programme type first' : ''"
+                        />
+                        <p v-if="form.errors.level_id" class="text-xs text-red-500">{{ form.errors.level_id }}</p>
                     </div>
 
                     <!-- Submit -->
                     <button
                         type="submit"
                         :disabled="form.processing || !form.department_id || !form.programme_type_id || !form.level_id"
-                        class="w-full bg-primary text-white py-2 rounded-lg hover:bg-opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="w-full flex items-center justify-center gap-2 py-2.5 bg-primary text-white text-sm font-medium rounded-lg transition-all duration-150 hover:bg-primary/90 active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed mt-2"
                     >
-                        {{ isUpdate ? 'Update Profile' : 'Save Profile' }}
+                        <svg v-if="form.processing" class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="32" stroke-dashoffset="12" stroke-linecap="round"/>
+                        </svg>
+                        <span>{{ isUpdate ? 'Update profile' : 'Save profile' }}</span>
+                        <svg v-if="!form.processing" width="15" height="15" viewBox="0 0 15 15" fill="none">
+                            <path d="M3 7.5h9M8.5 4l3.5 3.5L8.5 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </button>
 
                 </form>

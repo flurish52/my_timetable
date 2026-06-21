@@ -21,6 +21,7 @@ class TimeTableController extends Controller
         $user = Auth::user();
         $baseOfferings = CourseOffering::where('programme_id', $user->programme_id)
             ->where('level_id', $user->level_id)
+            ->where('type', 'core')
             ->get();
         $electives = StudentElective::where('student_id', $user->id)
             ->pluck('course_offering_id');

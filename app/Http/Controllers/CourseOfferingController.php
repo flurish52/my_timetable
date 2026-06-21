@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\CourseOffering;
 use App\Http\Requests\StoreCourseOfferingRequest;
 use App\Http\Requests\UpdateCourseOfferingRequest;
+use App\Models\StudentElective;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class CourseOfferingController extends Controller
 {
@@ -13,7 +16,16 @@ class CourseOfferingController extends Controller
      */
     public function index()
     {
-        //
+        $user = Auth::user();
+       return inertia::render('Courses/Index', [
+            'courseOfferings' => CourseOffering::with('course')
+                ->where('programme_id', $user->programme_id)
+            ->where('level_id', $user->level_id)
+                ->get(),
+
+           'studentElectives' => $user->electives()
+               ->select('id', 'course_offering_id')->get()
+        ]);
     }
 
     /**
@@ -29,7 +41,16 @@ class CourseOfferingController extends Controller
      */
     public function store(StoreCourseOfferingRequest $request)
     {
-        //
+        $data = $request->validate([
+            'course_offering_id' => ['required', 'integer', 'exists:course_offerings,id'],
+        ]);
+
+        StudentElective::firstOrCreate([
+            'student_id' => auth()->id(),
+            'course_offering_id' => $data['course_offering_id'],
+        ]);
+
+        return back();
     }
 
     /**
@@ -61,6 +82,10 @@ class CourseOfferingController extends Controller
      */
     public function destroy(CourseOffering $courseOffering)
     {
-        //
+        StudentElective::where('student_id', Auth::id())
+            ->where('course_offering_id', $courseOffering->id)
+            ->delete();
+
+        return redirect()->back();
     }
 }

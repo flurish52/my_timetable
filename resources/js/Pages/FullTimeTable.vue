@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import GuestLayout from "@/Layouts/GuestLayout.vue";
+import GuestLayout from "@/Layouts/AppLayout.vue";
 import {Head} from "@inertiajs/vue3";
 
 const props = defineProps({
