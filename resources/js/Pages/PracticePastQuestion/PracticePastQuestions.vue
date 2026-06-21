@@ -143,7 +143,10 @@ const props = defineProps({
 const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
 
 const totalMarks = computed(() =>
-    props.past_question.questions.reduce((sum, q) => sum + (q.marks || 0), 0)
+    props.past_question.questions.reduce(
+        (sum, q) => sum + Number(q.marks || 0),
+        0
+    )
 );
 
 const questionsInSection = (sectionId) =>

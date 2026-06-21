@@ -74,4 +74,8 @@ class Question extends Model
         'marks',
         'position',
     ];
+
+    protected $casts = [
+        'marks' => 'integer',
+    ];
 }
