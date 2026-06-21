@@ -1,7 +1,22 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <meta charset="utf-8">
+    <!-- Google tag starts here (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-T0MW452B3L"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-T0MW452B3L');
+    </script>
+
+    <!-- Google tag ends here (gtag.js) -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2501992701733410"
+            crossorigin="anonymous"></script>
+
+    <!--Adsense code ends here -->
+     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title inertia>{{ config('app.name', 'myTimetable') }}</title>
 
