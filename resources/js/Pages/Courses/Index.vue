@@ -10,9 +10,21 @@ const props = defineProps({
 })
 
 // ── Partition ──────────────────────────────────────────────────────────────
-const generals      = computed(() => props.courseOfferings.filter(o => o.is_general))
-const departmentals = computed(() => props.courseOfferings.filter(o => !o.is_general && o.type === 'core'))
-const allElectives  = computed(() => props.courseOfferings.filter(o => !o.is_general && o.type === 'elective'))
+const generals = computed(() =>
+    props.courseOfferings.filter(o => Number(o.is_general) === 1)
+)
+
+const departmentals = computed(() =>
+    props.courseOfferings.filter(
+        o => Number(o.is_general) !== 1 && o.type === 'core'
+    )
+)
+
+const allElectives = computed(() =>
+    props.courseOfferings.filter(
+        o => Number(o.is_general) !== 1 && o.type === 'elective'
+    )
+)
 
 const enrolledIds = computed(() => (props.studentElectives ?? []).map(e => e.course_offering_id))
 
@@ -52,6 +64,8 @@ const handleRemove = (enrollmentId) => {
 
 <template>
     <GuestLayout>
+
+        {{ generals }}
         <div class="min-h-screen bg-gray-50 px-4 py-8">
             <div class="max-w-5xl mx-auto space-y-10">
 
