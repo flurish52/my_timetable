@@ -8,7 +8,7 @@ function shareApp() {
     if (navigator.share) {
         navigator.share({
             title: 'myUniAlly',
-            text: 'Get past questions, timetables and more — free for Nigerian students!',
+            text: 'Stop using paper timetables. Get your class timetable, daily lectures, and past questions in one place with myUniAlly.',
             url: window.location.origin,
         })
     } else {
