@@ -25,44 +25,63 @@ const submit = () => {
     <GuestLayout>
         <Head title="Forgot Password" />
 
-        <div class="mb-4 text-sm text-gray-600">
-            Forgot your password? No problem. Just let us know your email
-            address and we will email you a password reset link that will allow
-            you to choose a new one.
-        </div>
+        <div class="flex min-h-[70vh] items-center justify-center px-4 py-10">
+            <div
+                class="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg sm:p-8"
+            >
+                <div class="mb-6 text-center">
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        Forgot Password
+                    </h1>
 
-        <div
-            v-if="status"
-            class="mb-4 text-sm font-medium text-green-600"
-        >
-            {{ status }}
-        </div>
+                    <p class="mt-3 text-sm leading-6 text-gray-600">
+                        Forgot your password? No problem. Just let us know your
+                        email address and we will email you a password reset
+                        link that will allow you to choose a new one.
+                    </p>
+                </div>
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="mt-4 flex items-center justify-end">
-                <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
+                <div
+                    v-if="status"
+                    class="mb-6 rounded-lg border border-green-200 bg-green-50 p-3 text-sm font-medium text-green-700"
                 >
-                    Email Password Reset Link
-                </PrimaryButton>
+                    {{ status }}
+                </div>
+
+                <form @submit.prevent="submit" class="space-y-5">
+                    <div>
+                        <InputLabel
+                            for="email"
+                            value="Email Address"
+                        />
+
+                        <TextInput
+                            id="email"
+                            type="email"
+                            class="mt-2 block w-full"
+                            v-model="form.email"
+                            required
+                            autofocus
+                            autocomplete="username"
+                        />
+
+                        <InputError
+                            class="mt-2"
+                            :message="form.errors.email"
+                        />
+                    </div>
+
+                    <div>
+                        <PrimaryButton
+                            class="w-full justify-center py-3"
+                            :class="{ 'opacity-25': form.processing }"
+                            :disabled="form.processing"
+                        >
+                            Email Password Reset Link
+                        </PrimaryButton>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
     </GuestLayout>
 </template>

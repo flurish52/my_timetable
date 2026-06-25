@@ -116,6 +116,12 @@
                                     <input type="checkbox" v-model="loginForm.remember" class="rounded border-gray-300 text-primary focus:ring-primary" />
                                     Remember me
                                 </label>
+
+                                <p class="mt-6 text-center text-sm text-gray-500">
+                                    <Link href="/forgot-password" class="font-semibold text-primary hover:underline ml-1">
+                                        Forgot password?
+                                    </Link>
+                                </p>
                             </div>
 
                         </div>
@@ -319,7 +325,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import {Link, useForm} from '@inertiajs/vue3'
 import { setupNotifications } from "@/composables/useNotifications.js";
 import InstallPWA from "@/Components/InstallPWA.vue";
 

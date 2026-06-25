@@ -185,6 +185,12 @@ const submit = () => {
                         </Link>
                     </p>
 
+                    <p class="mt-6 text-center text-sm text-gray-500">
+                        <Link href="/register" class="font-semibold text-primary hover:underline ml-1">
+                        Forgot password?
+                        </Link>
+                    </p>
+
                 </div>
 
                 <!-- Footer note -->
