@@ -10,9 +10,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
+use App\Mail\WelcomeMail;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -91,6 +93,7 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+        Mail::to($user)->queue(new WelcomeMail($user));
 
         if ($request->currentUrl && str_starts_with($request->currentUrl, config('app.url'))) {
             return redirect()->to($request->currentUrl);

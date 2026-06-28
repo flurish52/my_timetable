@@ -95,7 +95,7 @@ const submit = () => {
                                     required
                                     autofocus
                                     autocomplete="username"
-                                    placeholder="you@university.edu"
+                                    placeholder="Email, Phone or Username"
                                 />
                             </div>
                             <InputError class="mt-1.5" :message="form.errors.email" />

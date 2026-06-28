@@ -41,7 +41,6 @@ class QuestionAttemptController extends Controller
             'answers.*.answer_text'     => ['nullable', 'string'],
             'answers.*.is_correct'      => ['nullable', 'boolean'],
         ]);
-
         try {
             DB::transaction(function () use ($validated) {
                 $attempt = QuestionAttempt::create([
@@ -53,6 +52,8 @@ class QuestionAttemptController extends Controller
                     'started_at'       => now()->subSeconds($validated['time_taken']),
                     'submitted_at'     => now(),
                 ]);
+
+
 
 //                if (!empty($validated['answers'])) {
 //                    $rows = array_map(fn($a) => [

@@ -1,6 +1,5 @@
 <template>
     <div class="fixed inset-0 z-[60] flex flex-col bg-gray-50">
-
         <!-- Header lives outside the scroll area — structurally it can never scroll -->
         <ExamHeader
             :course-code="past_question.course.code"
@@ -132,8 +131,15 @@ function getOptions(q) {
 }
 
 function getAnswerText(q) {
+    // fill_blank / theory — answer is in q.answers
     if (q?.answers?.length) return q.answers[0]?.answer_text ?? null
-    if (q?.answer) return q.answer
+
+    // objective / mcq — correct answer is the option with is_correct = 1
+    if (q?.options?.length) {
+        const correct = q.options.find(o => o.is_correct == 1)
+        return correct ? (correct.option_text ?? correct.text ?? correct.label ?? null) : null
+    }
+
     return null
 }
 
@@ -190,16 +196,14 @@ async function submitExam() {
 
         if (isObjective) {
             const rawOptions = question.options ?? []
-            if (rawOptions.length && typeof rawOptions[0] === 'object') {
-                // options are objects — match by resolved text or by index
-                const resolvedOptions = getOptions(question) // array of strings
-                const matchIndex      = resolvedOptions.indexOf(selectedValue)
-                const matched         = matchIndex !== -1 ? rawOptions[matchIndex] : null
-                questionOptionId      = matched?.id ?? null
-            }
-            answerText = String(selectedValue)
+            const resolvedOptions = getOptions(question) // array of strings
+
+            // selectedValue is already the option index — use it directly
+            const matchIndex = Number(selectedValue)
+            const matched = rawOptions[matchIndex] ?? null
+            questionOptionId = matched?.id ?? null
+            answerText = resolvedOptions[matchIndex] ?? String(selectedValue)
         } else {
-            // theory / essay
             answerText = String(selectedValue ?? '')
         }
 

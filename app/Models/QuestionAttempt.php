@@ -14,6 +14,7 @@ class QuestionAttempt extends Model
         'correct_answers',
         'started_at',
         'submitted_at',
+        'total_attempted',
     ];
 
     protected $casts = [
