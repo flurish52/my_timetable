@@ -44,8 +44,9 @@ class User extends Authenticatable
         'level_id',
         'last_login_at',
         'is_online',
+        'waitlist_school_id',
+        'waitlist_joined_at',
     ];
-
     public function deviceTokens()
     {
         return $this->hasMany(DeviceToken::class);
@@ -53,6 +54,11 @@ class User extends Authenticatable
     public function questionAttempts()
     {
         return $this->hasMany(QuestionAttempt::class);
+    }
+
+    public function waitlistSchool()
+    {
+        return $this->belongsTo(School::class, 'waitlist_school_id');
     }
     /**
      * The attributes that should be hidden for serialization.
@@ -76,6 +82,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+        'waitlist_joined_at' => 'datetime',
         ];
     }
 }

@@ -6,24 +6,28 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PastQuestionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionAttemptController;
+use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\TimeTableController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PastQuestionController::class, 'index'])->name('pastquestions.get');
-    Route::get('/pastquestions', [PastQuestionController::class, 'index'])->name('view.past_questions');
-    Route::get('/pastquestions/{slug}', [PastQuestionController::class, 'showCoursePapers'])
-        ->name('view.past_questions_per_course');
+Route::get('/pastquestions', [PastQuestionController::class, 'index'])->name('view.past_questions');
+Route::get('/pastquestions/{slug}', [PastQuestionController::class, 'showCoursePapers'])
+    ->name('view.past_questions_per_course');
 
 Route::post('/store-token', [DeviceTokenController::class, 'store'])->name('save-token');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-Route::get('/setup', [ProfileController::class, 'createSetupAccount'])->name('setup.index');
-Route::put('/setup', [ProfileController::class, 'storeSetUpAccount'])->name('setup.store');
+    Route::get('/setup', [ProfileController::class, 'createSetupAccount'])->name('setup.index');
+    Route::put('/setup', [ProfileController::class, 'storeSetUpAccount'])->name('setup.store');
+    Route::get('/schools/{slug}', [SchoolController::class, 'show'])->name('schools.show');
+    Route::post('/schools/{slug}/waitlist', [SchoolController::class, 'join'])->name('schools.waitlist.join');
+    Route::get('/leaderboard', [SchoolController::class, 'leaderboard'])->name('schools.leaderboard');
+
 });
 
 Route::middleware(['auth', 'verified', 'profile.setup'])->group(callback: function () {
     Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
-//    Route::get('/storage/{file}');
     Route::get('/full_timetable', [TimeTableController::class, 'index'])->name('view.full_timetable');
 
     Route::get('/pastquestions/{slug}/{question_slug}', [PastQuestionController::class, 'startPractice'])
