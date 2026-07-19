@@ -5,16 +5,41 @@ import {createInertiaApp} from '@inertiajs/vue3';
 import {resolvePageComponent} from 'laravel-vite-plugin/inertia-helpers';
 import {createApp, h} from 'vue';
 import {ZiggyVue} from '../../vendor/tightenco/ziggy';
+import AppLayout from "@/Layouts/AppLayout.vue";
+import ContributorLayout from "@/Layouts/ContributorLayout.vue";
 
 const appName = import.meta.env.VITE_APP_NAME || 'myUniAlly';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
-    resolve: (name) =>
-        resolvePageComponent(
+    resolve: (name) => {
+        const page = resolvePageComponent(
             `./Pages/${name}.vue`,
             import.meta.glob('./Pages/**/*.vue'),
-        ),
+        );
+
+        return page.then((module) => {
+            module.default.layout = module.default.layout || (() => {
+                switch (true) {
+                    case name.startsWith('Public/'):
+                        return AppLayout;
+                    case name.startsWith('auth/'):
+                        return AppLayout;
+                    case name.startsWith('settings/'):
+                        return AppLayout;
+                    case name.startsWith('PastQuestions/'):
+                        return ContributorLayout;
+                        case name.startsWith('CourseOfferings/'):
+                        return ContributorLayout;
+                    case name.startsWith('Timetable/'):
+                        return ContributorLayout;
+                    default:
+                        return AppLayout;
+                }
+            })();
+            return module;
+        });
+    },
     setup({el, App, props, plugin}) {
         return createApp({render: () => h(App, props)})
 

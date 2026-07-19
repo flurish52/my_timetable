@@ -65,5 +65,6 @@ class PastQuestion extends Model
         'source_file',
         'created_by',
         'updated_by',
+        'slug',
     ];
 }

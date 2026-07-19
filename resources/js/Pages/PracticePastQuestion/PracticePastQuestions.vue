@@ -1,5 +1,4 @@
 <template>
-    <GuestLayout>
         <Head :title="`${past_question.course.code} ${past_question.semester.name}
         semester ${past_question.session}   - Index`" />
         <div class="min-h-screen bg-[#f8f9fb] font-sans text-[#1a1f2e] pb-20">
@@ -128,7 +127,6 @@
             </main>
 
         </div>
-    </GuestLayout>
 </template>
 
 <script setup>

@@ -1,5 +1,4 @@
 <template>
-    <GuestLayout>
         <Head :title="`${ past_question.title }- Past questions`" />
         <div class="min-h-screen flex items-start justify-center bg-[var(--color-bg,#f5f7fa)] font-inherit">
             <div class="w-full max-w-[680px] bg-[var(--color-surface,#fff)] border border-[var(--color-border,#e2e8f0)] rounded-2xl p-8 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
@@ -148,15 +147,12 @@
                 </p>
             </div>
         </div>
-    </GuestLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Head, router, Link } from '@inertiajs/vue3'
 import BackButton from "@/Components/BackButton.vue"
-import GuestLayout from "@/Layouts/AppLayout.vue"
-
 const props = defineProps({
     past_question: {
         type: Object,

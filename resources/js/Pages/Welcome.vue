@@ -1,5 +1,4 @@
 <template>
-    <GuestLayout>
         <Head title="Dashboard" />
         <div class="md:p-4">
             <Dashboardhome
@@ -8,7 +7,6 @@
             :programme="programme"
             />
         </div>
-    </GuestLayout>
 </template>
 
 <script setup>

@@ -37,6 +37,17 @@ public function handle(): void
             'questions.media'
         ])->findOrFail($this->pastQuestionId);
 
+        $hasQuestions = $pastQuestion->sections()
+            ->where(function ($query) {
+                $query->whereHas('questions')
+                    ->orWhereHas('groups.questions');
+            })
+            ->exists();
+
+        if (! $hasQuestions) {
+            return;
+        }
+
         $pdf = Pdf::loadView('pdf.past_question', [
             'pastQuestion' => $pastQuestion,
             'domain'       => parse_url(config('app.url'), PHP_URL_HOST),

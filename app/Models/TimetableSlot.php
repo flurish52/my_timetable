@@ -21,6 +21,9 @@ class TimetableSlot extends Model
         'venue',
         'lecturer',
         'is_elective_slot',
+        'school_id',
+        'created_by',
+        'updated_by',
     ];
 
     public function programme()

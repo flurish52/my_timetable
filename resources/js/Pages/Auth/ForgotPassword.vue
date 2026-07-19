@@ -22,7 +22,6 @@ const submit = () => {
 </script>
 
 <template>
-    <GuestLayout>
         <Head title="Forgot Password" />
 
         <div class="flex min-h-[70vh] items-center justify-center px-4 py-10">
@@ -83,5 +82,4 @@ const submit = () => {
                 </form>
             </div>
         </div>
-    </GuestLayout>
 </template>

@@ -1,5 +1,4 @@
 <template>
-    <AppLayout>
         <Head :title="`${past_question.course.code} - Examination`" />
         <div class="font-[DM_Sans,Segoe_UI,system-ui,sans-serif] bg-gray-50 min-h-dvh overflow-x-hidden">
             <!-- ── Exam Page ── -->
@@ -30,7 +29,6 @@
                 />
             </Transition>
         </div>
-    </AppLayout>
 </template>
 
 <script setup>

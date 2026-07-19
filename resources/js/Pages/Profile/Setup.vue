@@ -89,7 +89,6 @@ const submit = () => {
 </script>
 
 <template>
-    <GuestLayout>
         <Head :title="isWaitlist ? 'Join Waitlist' : 'Setup'" />
 
         <div class="flex items-center justify-center min-h-screen bg-gray-50 p-4">
@@ -199,5 +198,4 @@ const submit = () => {
                 </form>
             </div>
         </div>
-    </GuestLayout>
 </template>

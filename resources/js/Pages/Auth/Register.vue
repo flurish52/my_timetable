@@ -34,7 +34,6 @@ const submit = () => {
 </script>
 
 <template>
-    <GuestLayout>
         <Head title="Register" />
 
         <div class="min-h-screen flex items-center justify-center px-4 py-6 bg-gray-50">
@@ -262,5 +261,4 @@ const submit = () => {
 
             </div>
         </div>
-    </GuestLayout>
 </template>

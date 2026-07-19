@@ -26,7 +26,6 @@ const filteredSchools = computed(() => {
 </script>
 
 <template>
-    <GuestLayout>
         <Head title="Leaderboard" />
 
         <div class="min-h-screen bg-gray-50 ">
@@ -98,5 +97,4 @@ const filteredSchools = computed(() => {
 
             </div>
         </div>
-    </GuestLayout>
 </template>

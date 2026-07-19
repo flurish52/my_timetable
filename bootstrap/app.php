@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'profile.setup' => EnsureProfileSetup::class,
+                'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
 
     })

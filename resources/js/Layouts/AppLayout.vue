@@ -1,13 +1,13 @@
 <script setup>
 import NotificationPrompt from "@/Components/Notifications/NotificationPrompt.vue";
-import MobileNav from "@/Components/MobileNav.vue";
+import MobileNav from "@/Components/Navigation/BottomNav.vue";
 import {setupNotifications} from '../composables/useNotifications.js'
 import {onMounted} from "vue";
-import LoginNav from "@/Components/LoginNav.vue";
 import AuthHeader from "@/Components/AuthHeader.vue";
 import {usePage} from '@inertiajs/vue3'
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import ShareButton from "@/Components/CommunityButtons/ShareButton.vue";
+import ButtomNav from   "@/Components/Navigation/BottomNav.vue"
 const page = usePage()
 
 onMounted(() => {
@@ -53,8 +53,7 @@ onMounted(() => {
     </div>
 
     <div
-        v-if="$page.props?.auth?.user"
         class="mt-24">
-        <MobileNav/>
+        <ButtomNav />
     </div>
 </template>

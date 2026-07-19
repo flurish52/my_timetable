@@ -18,7 +18,6 @@ const join = () => form.post(`/schools/${props.school.slug}/waitlist`)
 </script>
 
 <template>
-    <GuestLayout>
         <Head :title="`${school.name} — Waitlist`" />
 
         <div class="flex items-center justify-center min-h-screen bg-gray-50 p-4">
@@ -63,5 +62,4 @@ const join = () => form.post(`/schools/${props.school.slug}/waitlist`)
 
             </div>
         </div>
-    </GuestLayout>
 </template>

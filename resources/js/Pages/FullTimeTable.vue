@@ -104,7 +104,6 @@ function isOngoingRow(hourSlot) {
 </script>
 
 <template>
-    <GuestLayout>
         <Head title="Full timetable" />
         <div class="flex px-4 md:px-12 flex-col h-full bg-white">
 
@@ -249,7 +248,6 @@ function isOngoingRow(hourSlot) {
             </div>
 
         </div>
-    </GuestLayout>
 </template>
 
 <style scoped>

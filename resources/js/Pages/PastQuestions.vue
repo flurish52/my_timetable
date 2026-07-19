@@ -1,5 +1,4 @@
 <template>
-    <GuestLayout>
         <Head title="Past Questions" />
 
         <div class="min-h-screen flex items-start justify-center bg-[var(--color-bg,#f5f7fa)] font-inherit">
@@ -127,7 +126,6 @@
                 </p>
             </div>
         </div>
-    </GuestLayout>
 </template>
 
 <script setup>
