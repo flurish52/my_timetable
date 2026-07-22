@@ -135,6 +135,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { Link, usePage } from '@inertiajs/vue3'
 import AppLayout from "@/Layouts/AppLayout.vue";
 
+const CONTRIBUTOR = '<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2.5 5A1.5 1.5 0 014 3.5h9A1.5 1.5 0 0114.5 5v10.086l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414l1.293 1.293V5H4v9.5a.5.5 0 01-.5.5H2a1 1 0 110-2h.5V5A1.5 1.5 0 012.5 5z" clip-rule="evenodd"/><path d="M6 7h5v1.5H6V7zm0 3h5v1.5H6V10zm0 3h3v1.5H6V13z"/></svg>'
 const DOCUMENT_ICON = '<svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 2a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V8.414a2 2 0 00-.586-1.414l-4.414-4.414A2 2 0 0010.586 2H5zm5 1.5V7a1 1 0 001 1h3.5L10 3.5zM7 11a1 1 0 100 2h6a1 1 0 100-2H7zm0 4a1 1 0 100 2h6a1 1 0 100-2H7z"/></svg>'
 const CALENDAR_ICON = '<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 011 1v1h6V3a1 1 0 112 0v1h1a2 2 0 012 2v11a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 011-1zm10 6H4v9a.5.5 0 00.5.5h11a.5.5 0 00.5-.5V8zM7 11a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h.01a1 1 0 100-2H10zm3 0a1 1 0 100 2h.01a1 1 0 100-2H13z" clip-rule="evenodd"/></svg>'
 const BOOK_ICON = '<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 3.104a.75.75 0 00-1.5 0v.395a30.29 30.29 0 00-6.393 1.13.75.75 0 00-.532.86l1.5 8.5a.75.75 0 00.83.615A28.73 28.73 0 0110 14a28.73 28.73 0 015.345.604.75.75 0 00.83-.615l1.5-8.5a.75.75 0 00-.532-.86 30.29 30.29 0 00-6.393-1.13v-.395zM10 15.5c-1.978 0-3.912.181-5.79.528l.13.735A28.73 28.73 0 0110 16.25c1.887 0 3.72.176 5.66.513l.13-.735A30.23 30.23 0 0010 15.5z"/></svg>'
@@ -150,6 +151,12 @@ const expanded = reactive({
 })
 
 const navItems = [
+    {
+        key: 'contributor',
+        label: 'Contributor Dashboard',
+        icon: CONTRIBUTOR,
+        indexRoute: 'contributor.dashboard',
+    },
     {
         key: 'past-questions',
         label: 'Past Questions',

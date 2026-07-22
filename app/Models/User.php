@@ -84,4 +84,20 @@ class User extends Authenticatable
         'waitlist_joined_at' => 'datetime',
         ];
     }
+
+    public function getIsCurrentlyOnlineAttribute(): bool
+    {
+        return $this->last_seen_at !== null
+            && $this->last_seen_at->gt(now()->subMinutes(2));
+    }
+
+    public function roleRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(RoleRequest::class);
+    }
+
+    public function latestRoleRequest(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(RoleRequest::class)->latestOfMany();
+    }
 }

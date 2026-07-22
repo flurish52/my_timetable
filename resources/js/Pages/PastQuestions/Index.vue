@@ -57,16 +57,18 @@ const filteredPastQuestions = computed(() => {
             <div v-for="pq in filteredPastQuestions" :key="pq.id"
                  class="flex items-center gap-4 px-4 py-3 hover:bg-primary/10">
                 <div class="min-w-0 flex-1">
-                    <p class="text-sm font-medium text-neutral-900 truncate">{{ pq.title }}</p>
+                    <p class="text-sm font-medium text-primary truncate">{{ pq.title }}</p>
                     <p class="text-xs text-neutral-500 mt-0.5">
                         {{ pq.course }} · {{ pq.session }} · {{ pq.questions_count }} question{{ pq.questions_count === 1 ? '' : 's' }} · updated {{ pq.updated_at }}
                     </p>
                 </div>
                 <PublishToggle :past-question="pq" />
                 <Link :href="route('past-question.show', pq.id)"
-                      class="shrink-0 text-sm text-neutral-500 hover:text-primary px-2 py-1">View</Link>
+                      class="shrink-0 text-sm text-neutral-500 hover:text-primary md:px-2 py-1">View</Link>
                 <Link :href="route('past-questions.build', pq.id)"
-                      class="shrink-0 text-sm text-primary font-medium px-2 py-1">Edit</Link>
+                      class="shrink-0 text-sm text-primary font-medium md:px-2 py-1">Edit</Link>
+                <Link :href="route('past-questions.import', pq.id)"
+                      class="shrink-0 text-sm text-primary hover:text-tertiary md:px-2 py-1">Import <br> questions</Link>
             </div>
         </div>
     </div>

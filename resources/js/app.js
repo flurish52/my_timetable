@@ -7,6 +7,7 @@ import {createApp, h} from 'vue';
 import {ZiggyVue} from '../../vendor/tightenco/ziggy';
 import AppLayout from "@/Layouts/AppLayout.vue";
 import ContributorLayout from "@/Layouts/ContributorLayout.vue";
+import axios from "axios";
 
 const appName = import.meta.env.VITE_APP_NAME || 'myUniAlly';
 
@@ -29,7 +30,9 @@ createInertiaApp({
                         return AppLayout;
                     case name.startsWith('PastQuestions/'):
                         return ContributorLayout;
-                        case name.startsWith('CourseOfferings/'):
+                    case name.startsWith('CourseOfferings/'):
+                        return ContributorLayout;
+                    case name.startsWith('Contributor/'):
                         return ContributorLayout;
                     case name.startsWith('Timetable/'):
                         return ContributorLayout;
@@ -41,8 +44,7 @@ createInertiaApp({
         });
     },
     setup({el, App, props, plugin}) {
-        return createApp({render: () => h(App, props)})
-
+        const app = createApp({render: () => h(App, props)})
             .use(plugin)
             .use(ZiggyVue)
             .directive('click-outside', {
@@ -55,8 +57,13 @@ createInertiaApp({
                 unmounted(el) {
                     document.removeEventListener('mousedown', el._clickOutside)
                 },
-            })
-            .mount(el);
+            });
+
+        if (props.initialPage.props.auth?.user) {
+            startHeartbeat()
+        }
+
+        app.mount(el);
     },
     progress: {
         color: '#4B5563',
@@ -93,3 +100,20 @@ if (isBrowserSupported) {
         }
     });
 }
+
+
+function startHeartbeat() {
+    const send = () => {
+        if (document.visibilityState === 'visible') {
+            axios.post('/heartbeat').catch(() => {
+            })
+        }
+    }
+    send() // immediate ping on load
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') send()
+    })
+    setInterval(send, 60000)
+}
+

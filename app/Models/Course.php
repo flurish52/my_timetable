@@ -23,4 +23,9 @@ class Course extends Model
     {
         return $this->hasMany(PastQuestion::class);
     }
+
+    public function school()
+    {
+        return $this->belongsTo(School::class);
+    }
 }

@@ -20,7 +20,6 @@ const form = useForm({
     instructions: '',
     description: '',
     duration_minutes: '',
-    source_file: null,
 })
 
 function submit() {
@@ -91,17 +90,6 @@ function submit() {
             <div>
                 <label class="block text-sm font-medium mb-1">Duration (minutes)</label>
                 <input v-model="form.duration_minutes" type="number" class="w-40 border rounded-md px-3 py-2" />
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium mb-1">Original file (optional)</label>
-                <input
-                    type="file"
-                    accept="application/pdf"
-                    @change="form.source_file = $event.target.files[0]"
-                    class="w-full text-sm"
-                />
-                <p v-if="form.errors.source_file" class="text-sm text-red-600 mt-1">{{ form.errors.source_file }}</p>
             </div>
 
             <button

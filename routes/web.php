@@ -2,11 +2,14 @@
 
 use App\Http\Controllers\CourseOfferingController;
 use App\Http\Controllers\DeviceTokenController;
+use App\Http\Controllers\HeartbeatController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PastQuestionController;
+use App\Http\Controllers\PastQuestionImportController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionAttemptController;
 use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\RoleRequestController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\TimeTableController;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +25,12 @@ Route::get('/pastquestions/{slug}', [PastQuestionController::class, 'showCourseP
     ->name('view.past_questions_per_course');
 
 Route::post('/store-token', [DeviceTokenController::class, 'store'])->name('save-token');
+
+
+
+Route::middleware('auth')->group(function () {
+    Route::post('/heartbeat', [HeartbeatController::class, 'store'])->name('heartbeat');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -65,6 +74,11 @@ Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,student,cont
         ->name('course_offering.destroy');
 
     Route::get('/profile', [ProfileController::class, 'update'])->name('profile.edit');
+
+    Route::get('/become-contributor', [RoleRequestController::class, 'create'])
+        ->name('role-requests.create');
+    Route::post('/become-contributor', [RoleRequestController::class, 'store'])
+        ->name('role-requests.store');
 });
 
 /*
@@ -80,10 +94,13 @@ Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,lecturer'])-
 /*
 |--------------------------------------------------------------------------
 | Contributor routes
-| Accessible by: lecturer, admin (contributor/student excluded)
+| Accessible by: contributor, admin (lecturer/student excluded)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,contributor'])->group(function () {
+
+    Route::get('/contributor', [\App\Http\Controllers\ContributorController::class, 'dashboard'])
+        ->name('contributor.dashboard');;
 
     Route::get('/contributor/past-questions', [PastQuestionController::class, 'contributorIndex'])
         ->name('past-questions.index');
@@ -103,10 +120,20 @@ Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,contributor'
     Route::get('/contributor/past-questions/{pastQuestion}', [PastQuestionController::class, 'show'])
         ->name('past-question.show');;
 
-    Route::post('/contributor/past-questions/{pastQuestion}/import', [QuestionController::class, 'importQuestions'])
+//        IMPORT SECTIONS
+
+    Route::get('/contributor/past-questions/{pastQuestion}/import', [PastQuestionImportController::class, 'index'])
         ->name('past-questions.import');
 
-    Route::get('/contributor/past-questions/import-template', [QuestionController::class, 'downloadImportTemplate'])
+    Route::post('/contributor/past-questions/{pastQuestion}/import', [PastQuestionImportController::class, 'importQuestions'])
+        ->name('past-questions.import-excel');
+
+    Route::post('/contributor/past-questions/{pastQuestion}/import2', [PastQuestionImportController::class, 'importDocument'])
+        ->name('past-questions.import-document');
+
+
+
+    Route::get('storage/contributor/past-questions/import-template', [PastQuestionImportController::class, 'downloadImportTemplate'])
         ->name('past-questions.import-template');
 
     Route::patch('/contributor/{pastQuestion}/publish', [PastQuestionController::class, 'togglePublish'])
@@ -146,10 +173,26 @@ Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,contributor'
 | Accessible by: admin only
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/dashboard', function () {
-        return "Admin Dashboard";
-    });
+use App\Http\Controllers\Admin\AdminController;
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    Route::get('/papers', [AdminController::class, 'papers'])->name('papers.index');
+    Route::patch('/papers/{paper}/approve', [AdminController::class, 'approvePaper'])->name('papers.approve');
+    Route::patch('/papers/{paper}/reject', [AdminController::class, 'rejectPaper'])->name('papers.reject');
+    Route::patch('/papers/{paper}/unpublish', [AdminController::class, 'unpublishPaper'])->name('papers.unpublish');
+
+    Route::get('/users', [AdminController::class, 'users'])->name('users.index');
+    Route::get('/users/{user}/history', [AdminController::class, 'contributorHistory'])->name('users.history');
+    Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole'])->name('users.updateRole');
+
+    // role requests from earlier
+    Route::get('/role-requests', [\App\Http\Controllers\RoleRequestController::class, 'index'])->name('role-requests.index');
+    Route::patch('/role-requests/{roleRequest}/approve', [\App\Http\Controllers\RoleRequestController::class, 'approve'])->name('role-requests.approve');
+    Route::patch('/role-requests/{roleRequest}/reject', [\App\Http\Controllers\RoleRequestController::class, 'reject'])->name('role-requests.reject');
+
+    Route::patch('/users/bulk-role', [AdminController::class, 'bulkUpdateRole'])->name('users.bulkUpdateRole');
 });
 
 /*

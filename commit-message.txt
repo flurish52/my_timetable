@@ -1,0 +1,13 @@
+feat: add past questions system, contributor layout, and admin dashboard
+
+- Past questions: create/build/show/index pages, section-group-question
+  builder, publish/draft toggle
+- Import: paste, Excel, Word, and PDF import, sharing one text parser
+- Contributor layout: responsive sidebar, active-link highlighting
+- Role-based access: student role on registration, role request flow
+  for contributor/lecturer/admin, admin approve/reject
+- Admin dashboard: stats overview, cross-user paper moderation
+  (approve/reject/unpublish), user management with bulk role
+  assignment, contributor submission history, role request review
+- Migration: reviewed_by/reviewed_at/rejection_reason on papers
+- Share user role via Inertia middleware

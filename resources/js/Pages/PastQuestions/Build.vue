@@ -1,6 +1,6 @@
 <script setup>
 import { reactive, ref, computed } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { router, Link } from '@inertiajs/vue3'
 import QuestionCard from '@/Components/PastQuestions/QuestionCard.vue'
 
 const props = defineProps({
@@ -79,8 +79,6 @@ const deletedGroupIds = ref([])
 const deletedQuestionIds = ref([])
 const errors = ref({})
 const saving = ref(false)
-const importing = ref(false)
-const fileInput = ref(null)
 
 // ---- derived summary info, used in the nav rail + sticky bar ----
 const sectionStats = computed(() =>
@@ -185,20 +183,6 @@ function save() {
         }
     )
 }
-
-function triggerImport() {
-    fileInput.value?.click()
-}
-function handleImportFile(e) {
-    const file = e.target.files[0]
-    if (!file) return
-    importing.value = true
-    router.post(
-        route('past-questions.import', props.pastQuestion.id),
-        { file },
-        { forceFormData: true, onFinish: () => { importing.value = false } }
-    )
-}
 </script>
 
 <template>
@@ -237,19 +221,12 @@ function handleImportFile(e) {
             <!-- Import bar -->
             <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-6 p-3 rounded-lg bg-tertiary/10 border border-tertiary/30">
                 <p class="text-sm text-neutral-600 flex-1">
-                    Transcribing from a printed paper? Fill the Excel template and import it in one go.
+                    Have questions elsewhere? Paste them in, or upload an Excel, Word, or PDF file.
                 </p>
-                <div class="flex gap-2 shrink-0">
-                    <a :href="route('past-questions.import-template')"
-                       class="text-sm px-3 py-1.5 rounded-md border border-neutral-300 text-neutral-600 hover:bg-white text-center">
-                        Get template
-                    </a>
-                    <button @click="triggerImport" :disabled="importing"
-                            class="text-sm px-3 py-1.5 rounded-md bg-tertiary text-white font-medium disabled:opacity-50">
-                        {{ importing ? 'Importing…' : 'Import Excel' }}
-                    </button>
-                    <input ref="fileInput" type="file" accept=".xlsx,.xls,.csv" class="hidden" @change="handleImportFile" />
-                </div>
+                <Link :href="route('past-questions.import', pastQuestion.id)"
+                      class="shrink-0 text-sm px-4 py-1.5 rounded-md bg-tertiary text-white font-medium text-center">
+                    Import questions
+                </Link>
             </div>
 
             <!-- Validation summary -->
@@ -337,10 +314,9 @@ function handleImportFile(e) {
                 + Add another section
             </button>
         </div>
-
         <!-- Sticky save bar -->
-        <div class="inset-x-0 z-40 bg-white/95 border-t border-neutral-200">
-            <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+        <div class="fixed inset-x-0 bottom-24 z-20 bg-white/95 border-t border-primary">
+            <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
         <span class="text-sm text-neutral-500">
           {{ totalQuestions }} question{{ totalQuestions === 1 ? '' : 's' }} · {{ totalMarks }} marks total
         </span>
