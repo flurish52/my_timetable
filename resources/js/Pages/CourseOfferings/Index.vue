@@ -61,7 +61,7 @@
                                             class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
                                             :class="typeBadge(offering)"
                                         >
-                                            {{ Boolean(offering.is_general) ? 'General' : offering.type }}
+                                            {{ offering.is_general === 1 ? 'General' : offering.type }}
                                         </span>
                             </td>
                             <td class="px-5 py-3 text-right">

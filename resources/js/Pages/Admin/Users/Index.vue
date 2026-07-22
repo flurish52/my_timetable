@@ -145,7 +145,6 @@ const timeAgo = (dateString: string | null) => {
                 <th class="p-3">Programme</th>
                 <th class="p-3">Level</th>
                 <th class="p-3">Last login</th>
-                <th class="p-3">Verified</th>
                 <th class="p-3">Role</th>
                 <th class="p-3">Actions</th>
             </tr>
@@ -162,21 +161,13 @@ const timeAgo = (dateString: string | null) => {
                         <span class="w-2 h-2 rounded-full shrink-0"
                               :class="user.is_online ? 'bg-secondary animate-pulse' : 'bg-gray-300'"/>
                         <span class="text-xs" :class="user.is_online ? 'text-secondary font-medium' : 'text-gray-400'">
-    {{ user.is_online ? 'Online' : `Last seen ${timeAgo(user.last_seen_at)}` }}
+    {{ user.is_online === 1 ? 'Online' : `Last seen ${timeAgo(user.last_seen_at)}` }}
 </span>
                     </div>
                 </td>
                 <td class="p-3 text-gray-600">{{ user.programme?.name ?? '—' }}</td>
                 <td class="p-3 text-gray-600">{{ user.level?.name ?? '—' }}</td>
                 <td class="p-3 text-gray-600 whitespace-nowrap">{{ timeAgo(user.last_login_at) }}</td>
-                <td class="p-3">
-                    <span
-                        class="text-xs px-2 py-0.5 rounded-full"
-                        :class="user.email_verified_at ? 'bg-secondary/10 text-secondary' : 'bg-tertiary/10 text-tertiary'"
-                    >
-                        {{ user.email_verified_at ? 'Verified' : 'Unverified' }}
-                    </span>
-                </td>
                 <td class="p-3">
                     <select :value="user.roles[0]?.name"
                             @change="updateRole(user.id, ($event.target as HTMLSelectElement).value)"
@@ -226,12 +217,6 @@ const timeAgo = (dateString: string | null) => {
                         </div>
                     </div>
                 </div>
-                <span
-                    class="text-xs px-2 py-0.5 rounded-full whitespace-nowrap shrink-0"
-                    :class="user.email_verified_at ? 'bg-secondary/10 text-secondary' : 'bg-tertiary/10 text-tertiary'"
-                >
-                    {{ user.email_verified_at ? 'Verified' : 'Unverified' }}
-                </span>
             </div>
 
             <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-50 text-xs">
