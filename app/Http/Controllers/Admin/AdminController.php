@@ -107,7 +107,7 @@ class AdminController extends Controller
             $q->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")
             )
             ->when($request->role, fn ($q, $role) => $q->role($role))
-            ->with('roles:id,name')
+            ->with('roles:id,name', 'level', 'programme')
             ->latest()
             ->paginate(20)
             ->withQueryString();

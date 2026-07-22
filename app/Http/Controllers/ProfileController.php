@@ -70,6 +70,7 @@ class ProfileController extends Controller
         $user->update([
             'programme_id' => $programme->id,
             'level_id' => $data['level_id'],
+            'school_id' => $data['school_id'],
         ]);
 
         return redirect()->route('dashboard');

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Link, usePage } from '@inertiajs/vue3'
+import AppLayout from "@/Layouts/AppLayout.vue";
 
 const drawerOpen = ref(false)
 const page = usePage()
@@ -16,7 +17,8 @@ const isActive = (href: string) => page.url.startsWith(new URL(href, window.loca
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50 flex">
+    <AppLayout>
+        <div class="min-h-screen bg-gray-50 flex">
         <!-- mobile overlay -->
         <div v-if="drawerOpen" @click="drawerOpen = false" class="fixed inset-0 bg-black/30 z-30 md:hidden" />
 
@@ -64,9 +66,10 @@ const isActive = (href: string) => page.url.startsWith(new URL(href, window.loca
                 <span class="ml-3 font-semibold text-primary">Admin</span>
             </header>
 
-            <main class="p-4 md:ml-72">
+            <main class="p-4 ">
                 <slot />
             </main>
         </div>
     </div>
+    </AppLayout>
 </template>

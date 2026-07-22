@@ -28,16 +28,13 @@ Route::post('/store-token', [DeviceTokenController::class, 'store'])->name('save
 
 
 
-Route::middleware('auth')->group(function () {
-    Route::post('/heartbeat', [HeartbeatController::class, 'store'])->name('heartbeat');
-});
-
 /*
 |--------------------------------------------------------------------------
 | Shared onboarding routes (any authenticated role, before profile setup)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/heartbeat', [HeartbeatController::class, 'store'])->name('heartbeat');
     Route::get('/setup', [ProfileController::class, 'createSetupAccount'])->name('setup.index');
     Route::put('/setup', [ProfileController::class, 'storeSetUpAccount'])->name('setup.store');
     Route::get('/schools/{slug}', [SchoolController::class, 'show'])->name('schools.show');

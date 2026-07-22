@@ -1,6 +1,5 @@
 <script setup>
 import NotificationPrompt from "@/Components/Notifications/NotificationPrompt.vue";
-import MobileNav from "@/Components/Navigation/BottomNav.vue";
 import {setupNotifications} from '../composables/useNotifications.js'
 import {onMounted} from "vue";
 import AuthHeader from "@/Components/AuthHeader.vue";
@@ -8,7 +7,11 @@ import {usePage} from '@inertiajs/vue3'
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import ShareButton from "@/Components/CommunityButtons/ShareButton.vue";
 import ButtomNav from   "@/Components/Navigation/BottomNav.vue"
+import LoginNav from "@/Components/LoginNav.vue";
+import { useHeartbeat } from '@/composables/useHeartbeat'
+
 const page = usePage()
+useHeartbeat()
 
 onMounted(() => {
     const user = page.props.auth?.user
@@ -27,7 +30,7 @@ onMounted(() => {
         </div>
         <nav>
             <div v-if="!$page.props.auth?.user">
-                <LoginNav/>
+                <LoginNav />
             </div>
             <div v-else>
                 <AuthHeader/>

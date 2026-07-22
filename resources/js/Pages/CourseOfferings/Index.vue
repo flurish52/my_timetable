@@ -61,7 +61,7 @@
                                             class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
                                             :class="typeBadge(offering)"
                                         >
-                                            {{ offering.is_general ? 'General' : offering.type }}
+                                            {{ Boolean(offering.is_general) ? 'General' : offering.type }}
                                         </span>
                             </td>
                             <td class="px-5 py-3 text-right">
@@ -280,7 +280,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import {ref, computed, onMounted} from 'vue'
 import { useForm, usePage } from '@inertiajs/vue3'
 import SearchableSelect from '@/Components/SearchableSelect.vue'
 import FlashMessages from '@/Components/FlashMessages.vue'

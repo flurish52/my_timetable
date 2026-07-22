@@ -7,12 +7,12 @@ use Illuminate\Http\Response;
 
 class HeartbeatController extends Controller
 {
-    public function store(Request $request): Response
+    public function store(Request $request)
     {
-        $request->user()->forceFill([
-            'last_seen_at' => now(),
+        $request->user()->update([
             'is_online' => true,
-        ])->save();
+            'last_seen_at' => now(),
+        ]);
 
         return response()->noContent();
     }

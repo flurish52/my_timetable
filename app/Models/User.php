@@ -23,6 +23,7 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Programme::class);
     }
+
     public function level()
     {
         return $this->belongsTo(Level::class);
@@ -32,6 +33,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(StudentElective::class, 'student_id');
     }
+
     protected $fillable = [
         'name',
         'email',
@@ -45,11 +47,14 @@ class User extends Authenticatable
         'is_online',
         'waitlist_school_id',
         'waitlist_joined_at',
+        'school_id',
     ];
+
     public function deviceTokens()
     {
         return $this->hasMany(DeviceToken::class);
     }
+
     public function questionAttempts()
     {
         return $this->hasMany(QuestionAttempt::class);
@@ -59,6 +64,7 @@ class User extends Authenticatable
     {
         return $this->belongsTo(School::class, 'waitlist_school_id');
     }
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -81,8 +87,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-        'waitlist_joined_at' => 'datetime',
-        ];
+            'waitlist_joined_at' => 'datetime',
+            'is_general' => 'boolean',
+            ];
     }
 
     public function getIsCurrentlyOnlineAttribute(): bool
