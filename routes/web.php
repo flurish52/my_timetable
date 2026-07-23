@@ -7,10 +7,12 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PastQuestionController;
 use App\Http\Controllers\PastQuestionImportController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProgrammeLevelSemesterController;
 use App\Http\Controllers\QuestionAttemptController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\RoleRequestController;
 use App\Http\Controllers\SchoolController;
+use App\Http\Controllers\SiteSettingController;
 use App\Http\Controllers\TimeTableController;
 use Illuminate\Support\Facades\Route;
 
@@ -162,6 +164,16 @@ Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,contributor'
     Route::post('/contributor/timetable', [TimetableController::class, 'store'])
         ->name('timetable.store');
 
+
+    Route::get('/contributor/semester', [ProgrammeLevelSemesterController::class, 'contributorShow']);
+    Route::put('/contributor/semester', [ProgrammeLevelSemesterController::class, 'contributorUpdate']);
+
+    Route::get('/contributor/setting', [SiteSettingController::class, 'contributorIndex'])
+        ->name('settings.contributor.index');
+
+    Route::put('/contributor/setting', [SiteSettingController::class, 'contributorUpdateCurrentSemester'])
+        ->name('settings.contributor.update-current-semester');
+
 });
 
 /*
@@ -182,14 +194,22 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::get('/users', [AdminController::class, 'users'])->name('users.index');
     Route::get('/users/{user}/history', [AdminController::class, 'contributorHistory'])->name('users.history');
-    Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole'])->name('users.updateRole');
+    Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole'])
+        ->name('users.updateRole');
 
     // role requests from earlier
-    Route::get('/role-requests', [\App\Http\Controllers\RoleRequestController::class, 'index'])->name('role-requests.index');
-    Route::patch('/role-requests/{roleRequest}/approve', [\App\Http\Controllers\RoleRequestController::class, 'approve'])->name('role-requests.approve');
-    Route::patch('/role-requests/{roleRequest}/reject', [\App\Http\Controllers\RoleRequestController::class, 'reject'])->name('role-requests.reject');
+    Route::get('/role-requests', [RoleRequestController::class, 'index'])->name('role-requests.index');
+    Route::patch('/role-requests/{roleRequest}/approve', [RoleRequestController::class, 'approve'])->name('role-requests.approve');
+    Route::patch('/role-requests/{roleRequest}/reject', [RoleRequestController::class, 'reject'])
+        ->name('role-requests.reject');
 
     Route::patch('/users/bulk-role', [AdminController::class, 'bulkUpdateRole'])->name('users.bulkUpdateRole');
+
+    Route::get('/admin/settings', [SiteSettingController::class, 'adminIndex'])
+        ->name('settings.index');
+
+    Route::put('/admin/settings/current-semester', [SiteSettingController::class, 'adminUpdateCurrentSemester'])
+        ->name('settings.update-current-semester');
 });
 
 /*

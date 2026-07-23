@@ -2,6 +2,8 @@
 import { computed } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import StatCard from '@/Components/Contributor/Statcard.vue'
+import CurrentSemesterSelector from "@/Components/Settings/AdminCurrentSemesterSelector.vue";
+import ContributorCurrentSemesterselector from "@/Components/Settings/ContributorCurrentSemesterselector.vue";
 
 const props = defineProps({
     stats: { type: Object, required: true },
@@ -33,7 +35,6 @@ const quickActionClasses = {
                 <h1 class="text-lg sm:text-xl font-bold text-primary">Dashboard</h1>
                 <p class="text-sm text-primary/60">An overview of your department's data.</p>
             </div>
-
             <!-- Stats -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
                 <StatCard label="Course offerings" :value="stats.course_offerings" tone="primary" />

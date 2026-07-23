@@ -28,4 +28,14 @@ class Programme extends Model
         'programme_type_id',
         'name',
     ];
+
+
+
+    public function currentSemesterFor(int $levelId): ?Semester
+    {
+        return ProgrammeLevelSemester::where('programme_id', $this->id)
+            ->where('level_id', $levelId)
+            ->with('semester')
+            ->first()?->semester;
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CourseOffering;
+use App\Models\ProgrammeLevelSemester;
 use App\Models\StudentElective;
 use App\Models\TimeTable;
 use App\Http\Requests\StoreTimeTableRequest;
@@ -20,7 +21,35 @@ class TimeTableController extends Controller
     {
         $user = Auth::user();
 
-        $courses = CourseOffering::where('programme_id', $user->programme_id)
+        $currentSemesterId = ProgrammeLevelSemester::where('programme_id', $user->programme_id)
+            ->where('level_id', $user->level_id)
+            ->value('semester_id');
+
+        if (! $currentSemesterId) {
+            return Inertia::render('Timetable/Index', [
+                'timetable' => [],
+                'courses' => [],
+                'noSemesterSet' => true,
+            ]);
+        }
+
+        $baseOfferings = CourseOffering::where('programme_id', $user->programme_id)
+            ->where('level_id', $user->level_id)
+            ->where('semester_id', $currentSemesterId)
+            ->where('type', 'core')
+            ->get();
+
+        $electiveOfferingIds = StudentElective::where('student_id', $user->id)
+            ->whereHas('courseOffering', function ($q) use ($currentSemesterId) {
+                $q->where('semester_id', $currentSemesterId);
+            })
+            ->pluck('course_offering_id');
+
+        $allowedOfferingIds = $baseOfferings->pluck('id')
+            ->merge($electiveOfferingIds)
+            ->unique();
+
+        $courses = CourseOffering::whereIn('id', $allowedOfferingIds)
             ->with('course')
             ->get()
             ->pluck('course')
@@ -42,21 +71,44 @@ class TimeTableController extends Controller
     public function viewFullTimetable()
     {
         $user = Auth::user();
+
+        // Resolve the current semester for this student's programme + level
+        $currentSemesterId = ProgrammeLevelSemester::where('programme_id', $user->programme_id)
+            ->where('level_id', $user->level_id)
+            ->value('semester_id');
+
+        if (! $currentSemesterId) {
+            return Inertia::render('FullTimeTable', [
+                'timetable' => [],
+                'user' => $user,
+                'noSemesterSet' => true,
+            ]);
+        }
+
         $baseOfferings = CourseOffering::where('programme_id', $user->programme_id)
             ->where('level_id', $user->level_id)
+            ->where('semester_id', $currentSemesterId)
             ->where('type', 'core')
             ->get();
-        $electives = StudentElective::where('student_id', $user->id)
+
+        $electiveOfferingIds = StudentElective::where('student_id', $user->id)
+            ->whereHas('courseOffering', function ($q) use ($currentSemesterId) {
+                $q->where('semester_id', $currentSemesterId);
+            })
             ->pluck('course_offering_id');
+
         $allowedOfferingIds = $baseOfferings->pluck('id')
-            ->merge($electives)
+            ->merge($electiveOfferingIds)
             ->unique();
+
         $courseIds = CourseOffering::whereIn('id', $allowedOfferingIds)
             ->pluck('course_id');
+
         $timetable = TimetableSlot::with('course')
             ->whereIn('course_id', $courseIds)
             ->get();
-        return inertia::render('FullTimeTable', [
+
+        return Inertia::render('FullTimeTable', [
             'timetable' => $timetable,
             'user' => $user,
         ]);
@@ -69,13 +121,28 @@ class TimeTableController extends Controller
     {
         $user = Auth::user();
 
+        $currentSemesterId = ProgrammeLevelSemester::where('programme_id', $user->programme_id)
+            ->where('level_id', $user->level_id)
+            ->value('semester_id');
+
+        if (! $currentSemesterId) {
+            return Inertia::render('Timetable/Create', [
+                'courses' => [],
+                'noSemesterSet' => true,
+            ]);
+        }
+        $courses = CourseOffering::where('programme_id', $user->programme_id)
+            ->where('level_id', $user->level_id)
+            ->when($currentSemesterId, fn ($q) => $q->where('semester_id', $currentSemesterId))
+            ->with('course')
+            ->get()
+            ->pluck('course')
+            ->unique('id')
+            ->values();
+
         return Inertia::render('Timetable/Create', [
-            'courses' => CourseOffering::where('programme_id', $user->programme_id)
-                ->with('course')
-                ->get()
-                ->pluck('course')
-                ->unique('id')
-                ->values(),
+            'courses' => $courses,
+            'noSemesterSet' => ! $currentSemesterId,
         ]);
     }
 
@@ -164,7 +231,7 @@ class TimeTableController extends Controller
     }
 
 
-    private function venueClash(string $venue, string $day, string $start, string $end, ?int $ignoreId = null)
+    private function venueClash(string $venue, string $day, string $start, string $end, int $semesterId, ?int $ignoreId = null)
     {
         return TimetableSlot::with('course')
             ->where('school_id', Auth::user()->school_id)
@@ -172,6 +239,9 @@ class TimeTableController extends Controller
             ->where('venue', $venue)
             ->where('start_time', '<', $end)
             ->where('end_time', '>', $start)
+            ->whereHas('course.courseOfferings', function ($q) use ($semesterId) {
+                $q->where('semester_id', $semesterId);
+            })
             ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
             ->first();
     }

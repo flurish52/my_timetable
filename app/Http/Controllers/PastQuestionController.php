@@ -7,6 +7,7 @@ use App\Models\CourseOffering;
 use App\Models\PastQuestion;
 use App\Http\Requests\StorePastQuestionRequest;
 use App\Http\Requests\UpdatePastQuestionRequest;
+use App\Models\ProgrammeLevelSemester;
 use App\Services\PastQuestionService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -19,22 +20,40 @@ class PastQuestionController extends Controller
      */
     public function index()
     {
-            $user = Auth::user();
-            if ($user) {
-                return Inertia::render('PastQuestions', [
-                    'user' => $user,
-                    'past_questions' => Course::with(['past_question' =>
-                        function ($query) {
-                        $query->where('status', 'published')->with('semester');
-                    }])->get()
-                ]);
-            } else {
-                return Inertia::render('PastQuestions', [
-                    'user' => $user,
-                    'past_questions' => Course::with('past_question')
-                        ->get(),
-                ]);
-            }
+        $user = Auth::user();
+
+        if (! $user) {
+            return Inertia::render('PastQuestions', [
+                'user' => $user,
+                'past_questions' => Course::with('past_question')->get(),
+            ]);
+        }
+
+        $currentSemesterId = ProgrammeLevelSemester::where('programme_id', $user->programme_id)
+            ->where('level_id', $user->level_id)
+            ->value('semester_id');
+
+//        if (! $currentSemesterId) {
+//            return Inertia::render('PastQuestions', [
+//                'user' => $user,
+//                'past_questions' => [],
+//                'noSemesterSet' => true,
+//            ]);
+//        }
+
+        $courseIds = CourseOffering::where('programme_id', $user->programme_id)
+            ->where('level_id', $user->level_id)
+            ->pluck('course_id');
+
+        $pastQuestions = Course::whereIn('id', $courseIds)
+            ->with(['past_question' => function ($query) {
+                $query->where('status', 'published')->with('semester');
+            }])->get();
+
+        return Inertia::render('PastQuestions', [
+            'user' => $user,
+            'past_questions' => $pastQuestions,
+        ]);
     }
 
     public function contributorIndex()

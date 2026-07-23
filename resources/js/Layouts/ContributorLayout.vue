@@ -35,6 +35,7 @@
                 class="fixed inset-y-0 left-0 z-40 w-72 h-screen shrink-0 flex flex-col bg-white border-r border-neutral-200 transition-transform duration-200 ease-out md:translate-x-0"
                 :class="isOpen ? 'translate-x-0 shadow-xl' : '-translate-x-full'"
             >
+
                 <!-- Brand -->
                 <div class="h-16 flex items-center gap-2.5 px-5 border-b border-neutral-200 shrink-0">
 <!--                    <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white text-sm font-bold shrink-0">-->
@@ -124,8 +125,10 @@
 
             <!-- Page content -->
             <div class="flex-1 min-w-0 flex flex-col md:ml-72  ">
+
                 <slot />
             </div>
+
         </div>
     </AppLayout>
 </template>
@@ -134,11 +137,14 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Link, usePage } from '@inertiajs/vue3'
 import AppLayout from "@/Layouts/AppLayout.vue";
+import ContributorCurrentSemesterselector from "@/Components/Settings/ContributorCurrentSemesterselector.vue";
 
 const CONTRIBUTOR = '<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2.5 5A1.5 1.5 0 014 3.5h9A1.5 1.5 0 0114.5 5v10.086l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414l1.293 1.293V5H4v9.5a.5.5 0 01-.5.5H2a1 1 0 110-2h.5V5A1.5 1.5 0 012.5 5z" clip-rule="evenodd"/><path d="M6 7h5v1.5H6V7zm0 3h5v1.5H6V10zm0 3h3v1.5H6V13z"/></svg>'
 const DOCUMENT_ICON = '<svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 2a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V8.414a2 2 0 00-.586-1.414l-4.414-4.414A2 2 0 0010.586 2H5zm5 1.5V7a1 1 0 001 1h3.5L10 3.5zM7 11a1 1 0 100 2h6a1 1 0 100-2H7zm0 4a1 1 0 100 2h6a1 1 0 100-2H7z"/></svg>'
 const CALENDAR_ICON = '<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 011 1v1h6V3a1 1 0 112 0v1h1a2 2 0 012 2v11a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 011-1zm10 6H4v9a.5.5 0 00.5.5h11a.5.5 0 00.5-.5V8zM7 11a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h.01a1 1 0 100-2H10zm3 0a1 1 0 100 2h.01a1 1 0 100-2H13z" clip-rule="evenodd"/></svg>'
 const BOOK_ICON = '<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 3.104a.75.75 0 00-1.5 0v.395a30.29 30.29 0 00-6.393 1.13.75.75 0 00-.532.86l1.5 8.5a.75.75 0 00.83.615A28.73 28.73 0 0110 14a28.73 28.73 0 015.345.604.75.75 0 00.83-.615l1.5-8.5a.75.75 0 00-.532-.86 30.29 30.29 0 00-6.393-1.13v-.395zM10 15.5c-1.978 0-3.912.181-5.79.528l.13.735A28.73 28.73 0 0110 16.25c1.887 0 3.72.176 5.66.513l.13-.735A30.23 30.23 0 0010 15.5z"/></svg>'
+const SETTINGS_ICON = '<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.34 1.804A1 1 0 019.32 1h1.36a1 1 0 01.98.804l.331 1.652a6.993 6.993 0 011.929 1.115l1.598-.54a1 1 0 011.186.447l.68 1.178a1 1 0 01-.205 1.251l-1.267 1.113a7.047 7.047 0 010 2.228l1.267 1.113a1 1 0 01.205 1.251l-.68 1.178a1 1 0 01-1.186.447l-1.598-.54a6.993 6.993 0 01-1.929 1.115l-.33 1.652a1 1 0 01-.98.804H9.32a1 1 0 01-.98-.804l-.331-1.652a6.993 6.993 0 01-1.929-1.115l-1.598.54a1 1 0 01-1.186-.447l-.68-1.178a1 1 0 01.205-1.251l1.267-1.113a7.047 7.047 0 010-2.228L2.821 6.774a1 1 0 01-.205-1.251l.68-1.178a1 1 0 011.186-.447l1.598.54A6.993 6.993 0 017.01 3.456l.33-1.652zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>'
+
 
 const page = usePage()
 
@@ -186,6 +192,12 @@ const navItems = [
             { label: 'My timetable', route: 'timetable.index' },
             { label: 'Create new', route: 'timetable.create' },
         ],
+    },
+    {
+        key: 'settings',
+        label: 'Settings',
+        icon: SETTINGS_ICON,
+        indexRoute: 'settings.contributor.index',
     },
 ]
 

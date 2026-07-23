@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CourseOffering;
 use App\Models\Programme;
+use App\Models\ProgrammeLevelSemester;
 use App\Models\StudentElective;
 use App\Models\TimetableSlot;
 use Illuminate\Http\Request;
@@ -19,14 +20,33 @@ class HomeController extends Controller
     {
         $user = Auth::user();
 
+        $currentSemesterId = ProgrammeLevelSemester::where('programme_id', $user->programme_id)
+            ->where('level_id', $user->level_id)
+            ->value('semester_id');
+
+        if (! $currentSemesterId) {
+            return Inertia::render('Welcome', [
+                'timetable' => [],
+                'programme' => Programme::find($user->programme_id),
+                'user' => $user,
+                'noSemesterSet' => true,
+            ]);
+        }
+
         // Core + general offerings
         $offeringCourseIds = CourseOffering::where('programme_id', $user->programme_id)
             ->where('level_id', $user->level_id)
+            ->where('semester_id', $currentSemesterId)
             ->where('type', 'core')
             ->pluck('course_id');
 
-        // Student electives
+        // Student electives, scoped to the same semester
         $electiveOfferingIds = StudentElective::where('student_id', $user->id)
+            ->whereHas('courseOffering', function ($q) use ($currentSemesterId, $user) {
+                $q->where('semester_id', $currentSemesterId)
+                    ->where('programme_id', $user->programme_id)
+                    ->where('level_id', $user->level_id);
+            })
             ->pluck('course_offering_id');
 
         $electiveCourseIds = CourseOffering::whereIn('id', $electiveOfferingIds)
@@ -42,11 +62,9 @@ class HomeController extends Controller
             ->whereIn('course_id', $courseIds)
             ->get();
 
-//        dd($timetable);
-
         return Inertia::render('Welcome', [
             'timetable' => $timetable,
-            'programme' => Programme::where('id', $user->programme_id)->first(),
+            'programme' => Programme::find($user->programme_id),
             'user' => $user,
         ]);
     }
