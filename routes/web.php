@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\ContributorController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseOfferingController;
 use App\Http\Controllers\DepartmentController;
@@ -54,6 +56,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 */
 Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,student,contributor'])->group(function () {
     Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
+    Route::get('/contributors', [ContributorController::class, 'index'])->name('contributors.public');
     Route::get('/full_timetable', [TimeTableController::class, 'viewFullTimetable'])->name('view.full_timetable');
 
     Route::get('/pastquestions/{slug}/{question_slug}', [PastQuestionController::class, 'startPractice'])
@@ -100,8 +103,8 @@ Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,lecturer'])-
 */
 Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,contributor'])->group(function () {
 
-    Route::get('/contributor', [\App\Http\Controllers\ContributorController::class, 'dashboard'])
-        ->name('contributor.dashboard');;
+    Route::get('/contributor', [ContributorController::class, 'dashboard'])
+        ->name('contributor.dashboard');
 
     Route::get('/contributor/past-questions', [PastQuestionController::class, 'contributorIndex'])
         ->name('past-questions.index');
@@ -184,7 +187,6 @@ Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,contributor'
 | Accessible by: admin only
 |--------------------------------------------------------------------------
 */
-use App\Http\Controllers\Admin\AdminController;
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');

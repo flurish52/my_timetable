@@ -15,9 +15,30 @@ class ContributorController extends Controller
     /**
      * Display a listing of the resource.
      */
+// ContributorController.php
     public function index()
     {
-        //
+        $schoolId = auth()->user()->school_id;
+
+        $contributors = User::whereHas('pastQuestions', function ($q) use ($schoolId) {
+            $q->where('school_id', $schoolId)->where('status', 'published');
+        })
+            ->withCount(['pastQuestions' => function ($q) use ($schoolId) {
+                $q->where('school_id', $schoolId)->where('status', 'published');
+            }])
+            ->orderByDesc('past_questions_count')
+            ->get()
+            ->map(fn ($u) => [
+                'id' => $u->id,
+                'username' => $u->username,
+                'year' => $u->level->name ?? null,
+                'contributions_count' => $u->past_questions_count,
+            ]);
+
+        return Inertia::render('Public/Contributors', [
+            'contributors' => $contributors,
+            'school' => auth()->user()->school->only(['id', 'name']),
+        ]);
     }
 
 

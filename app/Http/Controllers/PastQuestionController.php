@@ -80,7 +80,7 @@ class PastQuestionController extends Controller
 
     public function showCoursePapers($slug, PastQuestionService $pdfService) {
         $course = Course::with(['past_question' => function ($query) {
-            $query->where('status', 'published')->with('semester');
+            $query->where('status', 'published')->with(['semester', 'creator']);
         }])
             ->where('code', $slug)
             ->first();

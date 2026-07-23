@@ -19,20 +19,6 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    public function programme()
-    {
-        return $this->belongsTo(Programme::class);
-    }
-
-    public function level()
-    {
-        return $this->belongsTo(Level::class);
-    }
-
-    public function electives()
-    {
-        return $this->hasMany(StudentElective::class, 'student_id');
-    }
 
     protected $fillable = [
         'name',
@@ -49,6 +35,20 @@ class User extends Authenticatable
         'waitlist_joined_at',
         'school_id',
     ];
+    public function programme()
+    {
+        return $this->belongsTo(Programme::class);
+    }
+
+    public function level()
+    {
+        return $this->belongsTo(Level::class);
+    }
+
+    public function electives()
+    {
+        return $this->hasMany(StudentElective::class, 'student_id');
+    }
 
     public function deviceTokens()
     {
@@ -63,6 +63,14 @@ class User extends Authenticatable
     public function waitlistSchool()
     {
         return $this->belongsTo(School::class, 'waitlist_school_id');
+    }
+    public function pastQuestions()
+    {
+        return $this->hasMany(PastQuestion::class, 'created_by');
+    }
+    public function school()
+    {
+        return $this->belongsTo(School::class, 'school_id');
     }
 
     /**
