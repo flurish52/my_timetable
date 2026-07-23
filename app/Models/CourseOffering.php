@@ -43,4 +43,8 @@ class CourseOffering extends Model
     {
         return $this->belongsTo(Semester::class, 'semester_id');
     }
+
+    protected $casts = [
+        'is_general' => 'boolean',
+    ];
 }

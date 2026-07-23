@@ -88,8 +88,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'waitlist_joined_at' => 'datetime',
-            'is_general' => 'boolean',
-            ];
+            'last_seen_at' => 'datetime',
+            'is_online' => 'boolean',
+        ];
     }
 
     public function getIsCurrentlyOnlineAttribute(): bool

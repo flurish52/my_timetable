@@ -159,9 +159,9 @@ const timeAgo = (dateString: string | null) => {
                 <td class="p-3">
                     <div class="flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full shrink-0"
-                              :class="user.is_online ? 'bg-secondary animate-pulse' : 'bg-gray-300'"/>
-                        <span class="text-xs" :class="user.is_online ? 'text-secondary font-medium' : 'text-gray-400'">
-    {{ user.is_online === 1 ? 'Online' : `Last seen ${timeAgo(user.last_seen_at)}` }}
+                              :class="user.is_online ===1 ? 'bg-secondary animate-pulse' : 'bg-gray-300'"/>
+                        <span class="text-xs" :class="user.is_online===1 ? 'text-secondary font-medium' : 'text-gray-400'">
+    {{ user.is_online === 1 ? 'Online' : `${timeAgo(user.last_seen_at)}` }}
 </span>
                     </div>
                 </td>

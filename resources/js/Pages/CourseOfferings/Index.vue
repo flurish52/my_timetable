@@ -94,7 +94,7 @@
                             class="shrink-0 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
                             :class="typeBadge(offering)"
                         >
-                                {{ offering.is_general ? 'General' : offering.type }}
+                                {{ offering.is_general === 1 ? 'General' : offering.type }}
                             </span>
                     </div>
                     <div class="mt-3 flex items-center justify-between text-xs text-primary/60">
@@ -363,7 +363,7 @@ function submitEdit() {
 }
 
 function typeBadge(offering) {
-    if (offering.is_general) return 'bg-tertiary/10 text-tertiary'
+    if (offering.is_general === 1) return 'bg-tertiary/10 text-tertiary'
     return offering.type === 'core' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'
 }
 </script>
