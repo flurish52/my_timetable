@@ -66,13 +66,13 @@ const applyBulkRole = () => {
     }
 }
 
-// --- Online status: computed live from last_seen_at, never trust a stored flag ---
-const ONLINE_WINDOW_MS = 2 * 60 * 1000 // must match backend reaper window
-
-const isOnline = (user: any) => {
-    if (!user.last_seen_at) return false
-    return Date.now() - new Date(user.last_seen_at).getTime() < ONLINE_WINDOW_MS
-}
+// // --- Online status: computed live from last_seen_at, never trust a stored flag ---
+// const ONLINE_WINDOW_MS = 2 * 60 * 1000 // must match backend reaper window
+//
+// const isOnline = (user: any) => {
+//     if (!user.is_online) return false
+//     return Date.now() - new Date(user.last_seen_at).getTime() < ONLINE_WINDOW_MS
+// }
 
 const timeAgo = (dateString: string | null) => {
     if (!dateString) return 'Never'
@@ -159,10 +159,11 @@ const timeAgo = (dateString: string | null) => {
                 <td class="p-3">
                     <div class="flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full shrink-0"
-                              :class="user.is_online ===1 ? 'bg-secondary animate-pulse' : 'bg-gray-300'"/>
-                        <span class="text-xs" :class="user.is_online===1 ? 'text-secondary font-medium' : 'text-gray-400'">
-    {{ user.is_online === 1 ? 'Online' : `${timeAgo(user.last_seen_at)}` }}
-</span>
+                              :class="user.is_online? 'bg-secondary animate-pulse' : 'bg-gray-300'"/>
+                        <span class="text-xs"
+                              :class="user.is_online? 'text-secondary font-medium' : 'text-gray-400'">
+                                {{ user.is_online? 'Online' : `${timeAgo(user.last_seen_at)}` }}
+                        </span>
                     </div>
                 </td>
                 <td class="p-3 text-gray-600">{{ user.programme?.name ?? '—' }}</td>
@@ -206,20 +207,18 @@ const timeAgo = (dateString: string | null) => {
                         <p class="font-medium text-gray-900 break-words">{{ user.name }}</p>
                         <p class="text-gray-600 text-xs break-all">{{ user.email }}</p>
                         <div class="flex items-center gap-1.5 mt-1">
-                            <span
-                                class="w-2 h-2 rounded-full shrink-0"
-                                :class="isOnline(user) ? 'bg-secondary animate-pulse' : 'bg-gray-300'"
-                            />
+                            <span class="w-2 h-2 rounded-full shrink-0"
+                                  :class="user.is_online? 'bg-secondary animate-pulse' : 'bg-gray-300'"/>
                             <span class="text-xs"
-                                  :class="isOnline(user) ? 'text-secondary font-medium' : 'text-gray-400'">
-                                {{ isOnline(user) ? 'Online' : timeAgo(user.last_seen_at) }}
-                            </span>
+                                  :class="user.is_online? 'text-secondary font-medium' : 'text-gray-400'">
+                                {{ user.is_online? 'Online' : `${timeAgo(user.last_seen_at)}` }}
+                        </span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-50 text-xs">
+            <div class="grid grid-cols-2 px-6 gap-2 pt-1 border-t border-gray-50 text-xs">
                 <div>
                     <p class="text-gray-400">Programme</p>
                     <p class="text-gray-700 font-medium">{{ user.programme?.name ?? '—' }}</p>
@@ -234,7 +233,7 @@ const timeAgo = (dateString: string | null) => {
                 </div>
             </div>
 
-            <div class="flex flex-col gap-2 mt-3 pt-3 border-t border-gray-50">
+            <div class="flex flex-col gap-2 px-6 pt-1 border-t border-gray-50">
                 <select :value="user.roles[0]?.name"
                         @change="updateRole(user.id, ($event.target as HTMLSelectElement).value)"
                         class="text-xs rounded-lg border-gray-200 w-full">
