@@ -1,5 +1,5 @@
 <script setup>
-import {ref} from 'vue'
+import {computed, ref} from 'vue'
 import {Link, usePage} from '@inertiajs/vue3'
 
 const page = usePage()
@@ -12,6 +12,11 @@ function toggle() {
 function close() {
     open.value = false
 }
+const isOnlyStudent = computed(() => {
+    const roles = page.props.auth.user.roles
+
+    return roles.length === 1 && roles[0].name === 'student'
+})
 </script>
 
 <template>
@@ -122,26 +127,6 @@ function close() {
                         Manage courses
                     </Link>
 
-                    <!--                    Become a contributor -->
-                    <Link
-                         href="/become-contributor"
-                        @click="close"
-                        class="flex items-left gap-2.5  px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition group"
-                    >
-                        <span
-                            class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/15 transition">
-                           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8"
-                                viewBox="0 0 24 24">
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M12 14.25L4.5 9.75 12 5.25l7.5 4.5-7.5 4.5zm0 0v6m-7.5-3.75V16.5c0 .621 1.5 1.5 3 1.5h9c1.5 0 3-.879 3-1.5v-2.25"
-                                />
-                           </svg>
-                        </span>
-                        Become a Contributor
-                    </Link>
-
                     <!-- Settings -->
                     <Link
                         href="/setup"
@@ -161,6 +146,30 @@ function close() {
                         Settings
                     </Link>
 
+                </div>
+
+                <!--                    Become a contributor -->
+                <div
+                    v-if="isOnlyStudent"
+                    class="p-1.5 border-primary border-2 rounded-md ">
+                <Link
+                    href="/become-contributor"
+                    @click="close"
+                    class="flex items-left text-primary gap-2.5  px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition group"
+                >
+                        <span
+                            class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/15 transition">
+                           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8"
+                                viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M12 14.25L4.5 9.75 12 5.25l7.5 4.5-7.5 4.5zm0 0v6m-7.5-3.75V16.5c0 .621 1.5 1.5 3 1.5h9c1.5 0 3-.879 3-1.5v-2.25"
+                                />
+                           </svg>
+                        </span>
+                    Contribute
+                </Link>
                 </div>
 
                 <!-- Divider + Logout -->

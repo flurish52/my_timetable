@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseOfferingController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DeviceTokenController;
 use App\Http\Controllers\HeartbeatController;
 use App\Http\Controllers\HomeController;
@@ -210,6 +212,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::put('/admin/settings/current-semester', [SiteSettingController::class, 'adminUpdateCurrentSemester'])
         ->name('settings.update-current-semester');
+
+
+    Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
+    Route::post('/courses', [CourseController::class, 'store'])->name('courses.store');
+    Route::put('/courses/{course}', [CourseController::class, 'update'])->name('courses.update');
+
+    Route::get('/departments', [DepartmentController::class, 'index'])->name('departments.index');
+    Route::post('/departments', [DepartmentController::class, 'store'])->name('departments.store');
+    Route::put('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
+
 });
 
 /*

@@ -8,6 +8,7 @@ import {ZiggyVue} from '../../vendor/tightenco/ziggy';
 import AppLayout from "@/Layouts/AppLayout.vue";
 import ContributorLayout from "@/Layouts/ContributorLayout.vue";
 import axios from "axios";
+import AdminLayout from "@/Layouts/AdminLayout.vue";
 
 const appName = import.meta.env.VITE_APP_NAME || 'myUniAlly';
 
@@ -34,6 +35,8 @@ createInertiaApp({
                         return ContributorLayout;
                     case name.startsWith('Contributor/'):
                         return ContributorLayout;
+                        case name.startsWith('Admin/'):
+                        return AdminLayout;
                     case name.startsWith('Timetable/'):
                         return ContributorLayout;
                     default:

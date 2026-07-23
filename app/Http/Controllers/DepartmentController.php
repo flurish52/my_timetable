@@ -5,16 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\Department;
 use App\Http\Requests\StoreDepartmentRequest;
 use App\Http\Requests\UpdateDepartmentRequest;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class DepartmentController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        return Inertia::render('Admin/Department/Index', [
+            'departments' => Department::where('school_id', $request->user()->school_id)
+                ->orderBy('name')
+                ->get(['id', 'name', 'code']),
+        ]);
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -27,9 +34,19 @@ class DepartmentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreDepartmentRequest $request)
+    public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'code' => ['required', 'string', 'max:20'],
+        ]);
+
+        Department::create([
+            ...$validated,
+            'school_id' => $request->user()->school_id,
+        ]);
+
+        return back()->with('success', 'Department added.');
     }
 
     /**
@@ -51,9 +68,16 @@ class DepartmentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateDepartmentRequest $request, Department $department)
+    public function update(Request $request, Department $department)
     {
-        //
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'code' => ['required', 'string', 'max:20'],
+        ]);
+
+        $department->update($validated);
+
+        return back()->with('success', 'Department updated.');
     }
 
     /**

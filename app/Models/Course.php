@@ -10,6 +10,8 @@ class Course extends Model
     /** @use HasFactory<\Database\Factories\CourseFactory> */
     use HasFactory;
 
+
+    protected $fillable = ['code', 'title', 'slug', 'school_id', 'credit_unit'];
     public function timetables()
     {
         return $this->hasMany(Timetable::class);
