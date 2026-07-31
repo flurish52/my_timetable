@@ -11,14 +11,31 @@ firebase.initializeApp({
 })
 
 const messaging = firebase.messaging()
-messaging.onBackgroundMessage(function(payload) {
-    self.registration.showNotification(
-        payload.notification?.title || 'Notification',
-        {
-            body: payload.notification?.body || 'New notification!',
-            icon: '/icons/pwa-192x192.png'
-        }
-    )
-})
 
+messaging.onBackgroundMessage(async function (payload) {
+    // Our Laravel command sends DATA-ONLY payloads (no top-level
+    // "notification" key), so read from payload.data, not payload.notification.
+    const title = payload.data?.title || 'Notification';
+    const body = payload.data?.body || 'New notification!';
 
+    // Known FCM web quirk: if a tab with this app is open and focused,
+    // that tab's own onMessage() handler (in app.js) will already show a
+    // notification for this same payload. If we ALSO show one here, the
+    // user sees it twice. So: only show it from the service worker if no
+    // focused/visible client is currently handling it.
+    const allClients = await self.clients.matchAll({
+        type: 'window',
+        includeUncontrolled: true,
+    });
+
+    const hasFocusedClient = allClients.some((client) => client.focused);
+
+    if (hasFocusedClient) {
+        return;
+    }
+
+    self.registration.showNotification(title, {
+        body,
+        icon: '/icons/pwa-192x192.png',
+    });
+});

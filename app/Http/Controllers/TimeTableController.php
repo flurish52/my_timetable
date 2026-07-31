@@ -152,6 +152,7 @@ class TimeTableController extends Controller
      */
     public function store(StoreTimeTableRequest $request)
     {
+        $this->info('starting');
         $data = $request->validated();
 
         if (! $request->boolean('confirmed')) {

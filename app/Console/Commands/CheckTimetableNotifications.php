@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\CourseOffering;
+use App\Models\ProgrammeLevelSemester;
 use App\Models\StudentElective;
 use App\Models\TimetableSlot;
 use App\Models\User;
@@ -17,8 +18,6 @@ class CheckTimetableNotifications extends Command
 
     public function handle()
     {
-        $this->info('Starting ...');
-
         $now = now();
 
         $currentDay = strtolower($now->format('l'));
@@ -127,6 +126,7 @@ class CheckTimetableNotifications extends Command
 
                 $tokens = $users
                     ->flatMap(fn ($u) => $u->deviceTokens->pluck('token'))
+                    ->unique()
                     ->toArray();
 
                 $courseCode = $entry->course?->code ?? 'Class';
@@ -144,11 +144,9 @@ class CheckTimetableNotifications extends Command
 
                 $this->sendPushToTokens($tokens, $title, $body);
 
-                $this->info("Notification sent for {$courseCode}");
             }
         }
 
-        $this->info('Finished.');
     }
 
     private function sendPushToTokens(
@@ -176,16 +174,18 @@ class CheckTimetableNotifications extends Command
 
         foreach ($tokens as $token) {
 
-            Http::withToken($accessToken)
+            // IMPORTANT: data-only payload. Do NOT add a top-level
+            // "notification" key back in here — sending both
+            // "notification" and "data" causes Android/iOS to display
+            // the system-tray banner AND your foreground/background
+            // handler to display it again, i.e. the double-notification
+            // bug this app hit before.
+            $response = Http::withToken($accessToken)
                 ->post(
                     "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send",
                     [
                         'message' => [
                             'token' => $token,
-                            'notification' => [
-                                'title' => $title,
-                                'body' => $body,
-                            ],
                             'data' => [
                                 'title' => $title,
                                 'body' => $body,
@@ -193,6 +193,10 @@ class CheckTimetableNotifications extends Command
                         ],
                     ]
                 );
+
+            if ($response->failed()) {
+                $this->error("FCM rejected token {$token}: " . $response->body());
+            }
         }
     }
 
@@ -252,10 +256,26 @@ class CheckTimetableNotifications extends Command
         return $response['access_token'] ?? null;
     }
 
+    /**
+     * Returns the course IDs relevant to this user for their CURRENT
+     * semester only. Mirrors the resolution logic used in
+     * TimetableController@index: current semester comes from the
+     * ProgrammeLevelSemester pivot (programme_id + level_id), not from
+     * any semester_id column on the user.
+     */
     private function getUserCourseIds(User $user)
     {
+        $currentSemesterId = ProgrammeLevelSemester::where('programme_id', $user->programme_id)
+            ->where('level_id', $user->level_id)
+            ->value('semester_id');
+
+        if (! $currentSemesterId) {
+            return collect();
+        }
+
         $coreCourseIds = CourseOffering::where('programme_id', $user->programme_id)
             ->where('level_id', $user->level_id)
+            ->where('semester_id', $currentSemesterId)
             ->where(function ($query) {
                 $query->where('type', 'core')
                     ->orWhere('is_general', true);
@@ -263,6 +283,9 @@ class CheckTimetableNotifications extends Command
             ->pluck('course_id');
 
         $electiveOfferingIds = StudentElective::where('student_id', $user->id)
+            ->whereHas('courseOffering', function ($query) use ($currentSemesterId) {
+                $query->where('semester_id', $currentSemesterId);
+            })
             ->pluck('course_offering_id');
 
         $electiveCourseIds = CourseOffering::whereIn('id', $electiveOfferingIds)
