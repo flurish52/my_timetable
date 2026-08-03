@@ -17,6 +17,7 @@ messaging.onBackgroundMessage(async function (payload) {
     // "notification" key), so read from payload.data, not payload.notification.
     const title = payload.data?.title || 'Notification';
     const body = payload.data?.body || 'New notification!';
+    const url = payload.data?.url || '/'; // FIX: was payload.url, always undefined on data-only payloads
 
     // Known FCM web quirk: if a tab with this app is open and focused,
     // that tab's own onMessage() handler (in app.js) will already show a
@@ -37,5 +38,29 @@ messaging.onBackgroundMessage(async function (payload) {
     self.registration.showNotification(title, {
         body,
         icon: '/icons/pwa-192x192.png',
+        data: { url },
     });
+});
+
+// NEW: handles the actual tap. Without this, the notification shows fine
+// but tapping it does nothing — the OS just dismisses it.
+self.addEventListener('notificationclick', function (event) {
+    event.notification.close();
+
+    const url = event.notification.data?.url || '/';
+
+    event.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            // If a tab is already open on this exact path, just focus it
+            for (const client of windowClients) {
+                if (client.url.includes(url) && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            // Otherwise open a new tab/window at the target URL
+            if (self.clients.openWindow) {
+                return self.clients.openWindow(url);
+            }
+        })
+    );
 });

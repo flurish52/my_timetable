@@ -14,6 +14,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgrammeLevelSemesterController;
 use App\Http\Controllers\QuestionAttemptController;
 use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\QuestionOfTheDayController;
 use App\Http\Controllers\RoleRequestController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\SiteSettingController;
@@ -83,6 +84,18 @@ Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,student,cont
         ->name('role-requests.create');
     Route::post('/become-contributor', [RoleRequestController::class, 'store'])
         ->name('role-requests.store');
+
+
+
+//Question of the day
+    Route::get('/questions-of-the-day', [QuestionOfTheDayController::class, 'index'])
+        ->name('qotd.index');
+
+    Route::post('/questions-of-the-day/{questionOfTheDay}/attempt', [QuestionOfTheDayController::class, 'attempt'])
+        ->name('qotd.attempt');
+
+    Route::post('/questions-of-the-day/{questionOfTheDay}/shared', [QuestionOfTheDayController::class, 'markShared'])
+        ->name('qotd.shared');
 });
 
 /*

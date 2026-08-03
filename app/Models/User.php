@@ -98,6 +98,7 @@ class User extends Authenticatable
             'waitlist_joined_at' => 'datetime',
             'last_seen_at' => 'datetime',
             'is_online' => 'boolean',
+            'qotd_last_attempted_date' => 'date',
         ];
     }
 
@@ -115,5 +116,10 @@ class User extends Authenticatable
     public function latestRoleRequest(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(RoleRequest::class)->latestOfMany();
+    }
+
+    public function qotdAttempts(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(QuestionOfTheDayAttempt::class);
     }
 }

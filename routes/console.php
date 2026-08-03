@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\SelectQuestionsOfTheDay;
 use App\Models\User;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -18,3 +19,6 @@ Schedule::call(function () {
                 ->orWhere('last_seen_at', '<', now()->subMinutes(2));
         })->update(['is_online' => false]);
 })->everyMinute();
+
+Schedule::command(SelectQuestionsOfTheDay::class)->dailyAt('00:05');
+Schedule::command(SendQuestionOfTheDayPush::class)->dailyAt('00:15');
