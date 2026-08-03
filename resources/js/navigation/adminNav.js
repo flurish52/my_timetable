@@ -7,4 +7,5 @@ export default [
     { to: '/contributor', label: 'Contribute', icon: icons.upload },
     { to: '/pastquestions', label: 'Past Questions', icon: icons.pastQuestions },
     // { to: '/admin/settings', label: 'Settings', icon: icons.settings },
+    { to: '/questions-of-the-day', label: 'Daily Q', icon: icons.qotd },
 ]

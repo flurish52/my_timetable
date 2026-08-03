@@ -30,10 +30,28 @@ const canSubmit = computed(() => {
 const pasteWarning = ref(false)
 let pasteWarningTimeout = null
 
-function blockPaste() {
+// Blocked-paste inputTypes seen across mobile keyboards. Android/Gboard and
+// iOS's clipboard-suggestion bar insert text via the IME layer — they don't
+// always fire a real ClipboardEvent, so a plain @paste listener alone misses
+// them. beforeinput's inputType still reports it correctly, so we check both.
+const BLOCKED_INPUT_TYPES = [
+    'insertFromPaste',
+    'insertFromPasteAsQuotation',
+    'insertFromDrop',
+    'insertReplacementText', // some keyboards use this for clipboard suggestions
+]
+
+function blockPaste(event) {
+    if (event?.preventDefault) event.preventDefault()
     pasteWarning.value = true
     clearTimeout(pasteWarningTimeout)
     pasteWarningTimeout = setTimeout(() => (pasteWarning.value = false), 2500)
+}
+
+function handleBeforeInput(event) {
+    if (BLOCKED_INPUT_TYPES.includes(event.inputType)) {
+        blockPaste(event)
+    }
 }
 
 function submit() {
@@ -109,9 +127,25 @@ function share(withAnswer) {
                     <span class="text-xs font-bold text-primary tracking-wide uppercase">
                         {{ courseCode ?? 'General Knowledge' }}
                     </span>
-                    <span v-if="!hasAttempted" class="text-[11px] text-slate-400 font-medium">
-                        1 attempt / day
-                    </span>
+                    <div class="flex items-center gap-3">
+                        <span v-if="!hasAttempted" class="text-[11px] text-slate-400 font-medium">
+                            1 attempt / day
+                        </span>
+                        <button
+                            @click="share(false)"
+                            title="Share this question"
+                            class="flex items-center gap-1 text-primary hover:text-primary/70 transition-colors"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                                <circle cx="18" cy="5" r="3" />
+                                <circle cx="6" cy="12" r="3" />
+                                <circle cx="18" cy="19" r="3" />
+                                <line x1="8.6" y1="10.6" x2="15.4" y2="6.4" />
+                                <line x1="8.6" y1="13.4" x2="15.4" y2="17.6" />
+                            </svg>
+                            <span class="text-xs font-semibold">Share</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="p-5 space-y-5">
@@ -169,6 +203,7 @@ function share(withAnswer) {
                                 v-model="form.answer_text"
                                 @paste.prevent="blockPaste"
                                 @drop.prevent="blockPaste"
+                                @beforeinput="handleBeforeInput"
                                 rows="4"
                                 class="w-full border border-slate-200 rounded-xl p-3.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary resize-none"
                                 placeholder="Type your answer here..."
