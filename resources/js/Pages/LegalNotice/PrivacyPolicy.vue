@@ -64,6 +64,7 @@ const operatorName = 'Atuo Israel Beshuwhobel'
                         <li><span class="font-semibold">Google Analytics:</span> to understand how visitors use myUniAlly, such as which pages are viewed and how the site is accessed. This may involve cookies and similar technologies, and collects information like your IP address, device type, and browsing behavior on our site.</li>
                         <li><span class="font-semibold">Google Search Console:</span> used to monitor and improve our presence in search results. This tool doesn't access or process personal data about individual visitors.</li>
                         <li><span class="font-semibold">Our hosting provider:</span> to store data and run the application.</li>
+                        <li><span class="font-semibold">Google Sign-In:</span> if you choose to sign in or register using your Google account, we receive your name, email address, and profile picture from Google to create or log you into your myUniAlly account. We don't receive your Google password or access other Google data beyond this.</li>
                     </ul>
                     <p class="mt-2">
                         These providers only receive the information necessary to perform their function

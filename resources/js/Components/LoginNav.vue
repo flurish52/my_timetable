@@ -58,7 +58,7 @@
                     <!-- ── LOGIN FIELDS ── -->
                     <template v-if="mode === 'login'">
                         <div class="space-y-3">
-
+                            <GoogleSigninButton class="my-3"/>
                             <!-- Email -->
                             <div>
                                 <label class="text-xs font-medium text-gray-700 block mb-1">Email, Phone or Username</label>
@@ -150,6 +150,8 @@
 
                     <!-- ── REGISTER FIELDS ── -->
                     <template v-else>
+
+                        <GoogleSigninButton class="my-3"/>
                         <div class="space-y-3">
 
                             <!-- Name -->
@@ -331,6 +333,7 @@ import {Link, useForm} from '@inertiajs/vue3'
 import { setupNotifications } from "@/composables/useNotifications.js";
 import InstallPWA from "@/Components/InstallPWA.vue";
 import LegalAgreementNotice from "@/Components/LegalAgreementNotice.vue";
+import GoogleSigninButton from "@/Components/GoogleSigninButton.vue";
 
 const activeForm = ref(false)
 const mode = ref('login')

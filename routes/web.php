@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\ContributorController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseOfferingController;
@@ -38,6 +39,10 @@ Route::post('/store-token', [DeviceTokenController::class, 'store'])->name('save
 Route::get('/t_and_c', fn () => Inertia::render('LegalNotice/TermsOfService'))->name('terms');
 Route::get('/privacy_policy', fn () => Inertia::render('LegalNotice/PrivacyPolicy'))->name('privacy');
 
+
+//Google OAuth
+Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
 
 /*
 |--------------------------------------------------------------------------
