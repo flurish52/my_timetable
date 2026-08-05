@@ -25,7 +25,21 @@ class SelectQuestionsOfTheDay extends Command
         $lookbackDays = 30;
 
         $generalCourseIds = $this->courseScopeResolver->allActiveGeneralCourseIds();
-        $this->selectForScope('general', null, $generalCourseIds, $today, $lookbackDays);
+
+        if ($generalCourseIds->isNotEmpty()) {
+            // Pick ONE random course from the general pool — bounded by the
+            // pool's actual size, so the index is never out of range.
+            $randomIndex = random_int(0, $generalCourseIds->count() - 1);
+            $pickedCourseId = $generalCourseIds->values()->get($randomIndex);
+
+            // course_id is now always filled — even for 'general' scope — so we
+            // can track which specific course each day's general question came from.
+            $this->selectForScope('general', $pickedCourseId, collect([$pickedCourseId]), $today, $lookbackDays);
+        } else {
+            // Different scenario: no general courses exist at all right now.
+            // Nothing to pick — skip today's general QOTD rather than error out.
+            $this->warn('No general courses available — skipping general Question of the Day for today.');
+        }
 
         $activeCourseIds = $this->courseScopeResolver->allActiveCourseIds();
 

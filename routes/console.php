@@ -20,5 +20,5 @@ Schedule::call(function () {
         })->update(['is_online' => false]);
 })->everyMinute();
 
-Schedule::command(SelectQuestionsOfTheDay::class)->dailyAt('00:05');
-Schedule::command(SendQuestionOfTheDayPush::class)->dailyAt('00:15');
+Schedule::command('qotd:select')->timezone('Africa/Lagos')->dailyAt('00:05');
+Schedule::command('qotd:notify')->timezone('Africa/Lagos')->dailyAt('06:15');

@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Models\DeviceToken;
+use App\Models\QuestionOfTheDay;
 use App\Models\User;
 use App\Services\FcmPushService;
 use App\Services\QotdResolver;
@@ -45,6 +47,19 @@ class SendQuestionOfTheDayPush extends Command
                     ]);
                 }
             });
+
+
+        $generalQotd = QuestionOfTheDay::where('date', $today)->where('scope_type', 'general')->first();
+
+        if ($generalQotd) {
+            DeviceToken::whereNull('user_id')
+                ->chunk(200, function ($tokens) use ($generalQotd) {
+                    [$title, $body] = $this->buildMessage($generalQotd);
+                    $this->fcm->sendToTokens($tokens->pluck('token')->toArray(), $title, $body, [
+                        'url' => '/questions-of-the-day',
+                    ]);
+                });
+        }
 
         $this->info('QOTD push notifications sent for ' . $today->toDateString());
 

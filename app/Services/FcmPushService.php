@@ -40,9 +40,15 @@ class FcmPushService
                         ], $extraData),
                     ],
                 ]);
-
             if ($response->failed()) {
-                report(new \RuntimeException("FCM rejected token {$token}: " . $response->body()));
+                $errorCode = $response->json('error.details.0.errorCode');
+
+                if ($errorCode === 'UNREGISTERED') {
+                    // Token is dead — remove it so we stop wasting calls on it
+                    \App\Models\DeviceToken::where('token', $token)->delete();
+                    continue;
+                }
+                    report(new \RuntimeException("FCM rejected token {$token}: " . $response->body()));
             }
         }
     }
