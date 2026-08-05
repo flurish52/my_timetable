@@ -1,4 +1,5 @@
 <template>
+    <Head title="Create_courseOfferings" />
     <div class="max-w-xl mx-auto px-4 py-8 md:px-8">
         <div class="mb-6">
             <Link :href="route('course_offerings.index')" class="text-sm font-medium text-secondary hover:text-secondary/80">
@@ -72,7 +73,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Link, useForm, usePage } from '@inertiajs/vue3'
+import {Head, Link, useForm, usePage} from '@inertiajs/vue3'
 import SearchableSelect from '@/Components/SearchableSelect.vue'
 import FlashMessages from "@/Components/FlashMessages.vue";
 

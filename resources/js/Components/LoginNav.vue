@@ -307,6 +307,8 @@
                                 Creating account…
                             </template>
                         </button>
+
+                        <LegalAgreementNotice />
                     </template>
 
                     <!-- Toggle mode -->
@@ -328,6 +330,7 @@ import { ref } from 'vue'
 import {Link, useForm} from '@inertiajs/vue3'
 import { setupNotifications } from "@/composables/useNotifications.js";
 import InstallPWA from "@/Components/InstallPWA.vue";
+import LegalAgreementNotice from "@/Components/LegalAgreementNotice.vue";
 
 const activeForm = ref(false)
 const mode = ref('login')

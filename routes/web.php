@@ -20,6 +20,7 @@ use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\SiteSettingController;
 use App\Http\Controllers\TimeTableController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +34,9 @@ Route::get('/pastquestions/{slug}', [PastQuestionController::class, 'showCourseP
 
 Route::post('/store-token', [DeviceTokenController::class, 'store'])->name('save-token');
 
+
+Route::get('/t_and_c', fn () => Inertia::render('LegalNotice/TermsOfService'))->name('terms');
+Route::get('/privacy_policy', fn () => Inertia::render('LegalNotice/PrivacyPolicy'))->name('privacy');
 
 
 /*

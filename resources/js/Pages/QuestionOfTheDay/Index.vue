@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import {Head, useForm} from '@inertiajs/vue3'
 import RichText from '@/Components/exam/RichText.vue'
 
 const props = defineProps({
@@ -88,6 +88,7 @@ function share(withAnswer) {
 </script>
 
 <template>
+    <Head title="Question of the day -QOTD" />
     <div class="min-h-screen bg-slate-50">
         <div class="max-w-xl mx-auto px-4 py-8">
 

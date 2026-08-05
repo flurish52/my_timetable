@@ -15,7 +15,7 @@
                         class="flex items-center justify-center w-6 h-6 transition-transform duration-200 group-[.is-active]:scale-110"
                         v-html="item.icon"
                     ></span>
-                    <span class="text-[0.65rem] font-semibold tracking-wide leading-none">
+                    <span class="text-[0.65rem] text-center font-semibold tracking-wide leading-none">
                         {{ item.label }}
                     </span>
                 </Link>

@@ -1,4 +1,5 @@
 <template>
+    <Head title="Contributor_courseOffering" />
     <div class="max-w-5xl px-4 py-6 sm:py-8 md:px-8">
         <FlashMessages />
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
@@ -281,7 +282,7 @@
 
 <script setup>
 import {ref, computed, onMounted} from 'vue'
-import { useForm, usePage } from '@inertiajs/vue3'
+import {Head, useForm, usePage} from '@inertiajs/vue3'
 import SearchableSelect from '@/Components/SearchableSelect.vue'
 import FlashMessages from '@/Components/FlashMessages.vue'
 import SearchInput from '@/Components/SearchInput.vue'

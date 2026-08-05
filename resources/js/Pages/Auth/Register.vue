@@ -1,5 +1,4 @@
 <script setup>
-import GuestLayout from '@/Layouts/AppLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
@@ -7,6 +6,7 @@ import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { setupNotifications } from "@/composables/useNotifications.js";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
+import LegalAgreementNotice from "@/Components/LegalAgreementNotice.vue";
 import { ref } from 'vue';
 
 const showPassword = ref(false);
@@ -240,6 +240,8 @@ const submit = () => {
                                     Creating account…
                                 </span>
                             </PrimaryButton>
+
+                            <LegalAgreementNotice class="mt-3" />
                         </div>
 
                     </form>

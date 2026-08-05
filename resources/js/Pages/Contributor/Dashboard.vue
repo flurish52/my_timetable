@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { Link } from '@inertiajs/vue3'
+import {Head, Link} from '@inertiajs/vue3'
 import StatCard from '@/Components/Contributor/Statcard.vue'
 import CurrentSemesterSelector from "@/Components/Settings/AdminCurrentSemesterSelector.vue";
 import ContributorCurrentSemesterselector from "@/Components/Settings/ContributorCurrentSemesterselector.vue";
@@ -30,6 +30,7 @@ const quickActionClasses = {
 </script>
 
 <template>
+    <Head title="Contributor_dashboard" />
         <div class="max-w-5xl mx-auto px-4 py-6 sm:py-8 md:px-8">
             <div class="mb-6">
                 <h1 class="text-lg sm:text-xl font-bold text-primary">Dashboard</h1>
