@@ -33,13 +33,13 @@ class PastQuestionController extends Controller
             ->where('level_id', $user->level_id)
             ->value('semester_id');
 
-//        if (! $currentSemesterId) {
-//            return Inertia::render('PastQuestions', [
-//                'user' => $user,
-//                'past_questions' => [],
-//                'noSemesterSet' => true,
-//            ]);
-//        }
+        if (! $currentSemesterId) {
+            return Inertia::render('PastQuestions', [
+                'user' => $user,
+                'past_questions' => [],
+                'noSemesterSet' => true,
+            ]);
+        }
 
         $courseIds = CourseOffering::where('programme_id', $user->programme_id)
             ->where('level_id', $user->level_id)

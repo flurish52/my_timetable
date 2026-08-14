@@ -3,10 +3,10 @@
         <!-- Left: course info -->
         <div class="flex flex-col min-w-0 gap-0.5">
       <span class="text-[10px] font-extrabold text-primary uppercase tracking-wider">
-        {{ courseCode }}
+        {{ courseCode || 'Course' }}
       </span>
             <span class="text-[13px] font-semibold text-gray-900 truncate max-w-[52vw] md:max-w-none">
-        {{ courseTitle }}
+        {{ courseTitle || 'Untitled paper' }}
       </span>
         </div>
 
@@ -38,25 +38,30 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-    courseCode: String,
-    courseTitle: String,
-    timeLeft: Number, // seconds
+    courseCode: { type: String, default: '' },
+    courseTitle: { type: String, default: '' },
+    timeLeft: { type: Number, default: 0 }, // seconds
 })
 
 defineEmits(['submit'])
 
+const safeTimeLeft = computed(() => {
+    const n = Number(props.timeLeft)
+    return Number.isFinite(n) && n > 0 ? n : 0
+})
+
 const formattedTime = computed(() => {
-    const h = Math.floor(props.timeLeft / 3600)
-    const m = Math.floor((props.timeLeft % 3600) / 60)
-    const s = props.timeLeft % 60
+    const h = Math.floor(safeTimeLeft.value / 3600)
+    const m = Math.floor((safeTimeLeft.value % 3600) / 60)
+    const s = safeTimeLeft.value % 60
     if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 })
 
 const timerClasses = computed(() => {
-    if (props.timeLeft <= 300)
+    if (safeTimeLeft.value <= 300)
         return 'bg-red-50 border-red-300 text-red-600 animate-pulse'
-    if (props.timeLeft <= 600)
+    if (safeTimeLeft.value <= 600)
         return 'bg-amber-50 border-amber-300 text-amber-600'
     return 'bg-gray-50 border-gray-200 text-gray-900'
 })

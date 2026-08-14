@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\ContributorController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\QuestionAttemptController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\QuestionOfTheDayController;
 use App\Http\Controllers\RoleRequestController;
+use App\Http\Controllers\ScanController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\SiteSettingController;
 use App\Http\Controllers\TimeTableController;
@@ -56,6 +58,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/schools/{slug}', [SchoolController::class, 'show'])->name('schools.show');
     Route::post('/schools/{slug}/waitlist', [SchoolController::class, 'join'])->name('schools.waitlist.join');
     Route::get('/leaderboard', [SchoolController::class, 'leaderboard'])->name('schools.leaderboard');
+
+    Route::get('/scan/{course?}', [ScanController::class, 'create'])->name('scan.create');
+    Route::post('/scan', [ScanController::class, 'store'])->name('scan.store');
+    Route::get('/scan/review/{pastQuestion}', [ScanController::class, 'review'])->name('scan.review');
+
+    Route::get('/activity', [ActivityController::class, 'index'])->name('activity.index');
 });
 
 /*
@@ -93,7 +101,6 @@ Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,student,cont
         ->name('role-requests.create');
     Route::post('/become-contributor', [RoleRequestController::class, 'store'])
         ->name('role-requests.store');
-
 
 
 //Question of the day

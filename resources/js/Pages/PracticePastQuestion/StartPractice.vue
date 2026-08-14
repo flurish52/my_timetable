@@ -1,6 +1,22 @@
 <template>
-        <Head :title="`${past_question.course.code} - Examination`" />
-        <div class="font-[DM_Sans,Segoe_UI,system-ui,sans-serif] bg-gray-50 min-h-dvh overflow-x-hidden">
+    <Head :title="past_question?.course?.code ? `${past_question.course.code} - Examination` : 'Examination'" />
+    <div class="font-[DM_Sans,Segoe_UI,system-ui,sans-serif] bg-gray-50 min-h-dvh overflow-x-hidden">
+
+        <!-- Whole-page empty state: past_question itself is null/missing -->
+        <div v-if="!past_question" class="max-w-[500px] mx-auto px-4 pt-24 flex flex-col items-center gap-3 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-1">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-gray-400">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                </svg>
+            </div>
+            <span class="font-medium text-gray-500">We couldn't load this paper</span>
+            <span class="text-xs text-gray-400 max-w-[280px]">
+                    It may still be processing, or the link may be out of date. Try going back and opening it again.
+                </span>
+        </div>
+
+        <template v-else>
             <!-- ── Exam Page ── -->
             <Transition name="page-slide-r">
                 <ExamPage
@@ -14,11 +30,11 @@
             <Transition name="page-slide">
                 <ResultsPage
                     v-if="resultsMode"
-                    :questions="past_question.questions"
-                    :sections="past_question.sections"
+                    :questions="questions"
+                    :sections="sections"
                     :answers="submittedAnswers"
-                    :course-code="past_question.course.code"
-                    :course-title="past_question.course.title"
+                    :course-code="past_question.course?.code ?? ''"
+                    :course-title="past_question.course?.title ?? 'Untitled course'"
                     :score-percent="scorePercent"
                     :correct-count="correctCount"
                     :wrong-count="wrongCount"
@@ -28,7 +44,8 @@
                     @retake="handleRetake"
                 />
             </Transition>
-        </div>
+        </template>
+    </div>
 </template>
 
 <script setup>
@@ -39,8 +56,19 @@ import ResultsPage from '@/components/exam/ResultsPage.vue'
 import {Head} from "@inertiajs/vue3";
 
 const props = defineProps({
-    past_question: Object,
+    past_question: {
+        type: Object,
+        // Nullable: an unresolved paper, or one whose relations (course,
+        // questions, sections) may not all be present yet.
+        default: null,
+    },
 })
+
+/* ── Safe derived data ── */
+// Every scoring computed below reads from these instead of props.past_question
+// directly, so a null paper or a missing questions/sections array never throws.
+const questions = computed(() => props.past_question?.questions ?? [])
+const sections  = computed(() => props.past_question?.sections ?? [])
 
 /* ── State ── */
 const resultsMode      = ref(false)
@@ -64,7 +92,7 @@ function handleRetake() {
 const LETTERS = ['A', 'B', 'C', 'D', 'E']
 
 function getQuestionType(q) {
-    return (q.type || q.question_type || 'objective').toLowerCase()
+    return (q?.type || q?.question_type || 'objective').toLowerCase()
 }
 function isMcq(q) {
     const t = getQuestionType(q)
@@ -75,7 +103,7 @@ function isTrueFalse(q) {
     return t.includes('true') || t.includes('false') || t === 'tf'
 }
 function getOptions(q) {
-    if (q.options?.length) {
+    if (q?.options?.length) {
         if (typeof q.options[0] === 'object')
             return q.options.map(o => o.option_text ?? o.text ?? o.label ?? Object.values(o)[1])
         return q.options
@@ -83,12 +111,12 @@ function getOptions(q) {
     return []
 }
 function getAnswerText(q) {
-    if (q.answers?.length) return q.answers[0]?.answer_text ?? null
-    if (q.answer) return q.answer
+    if (q?.answers?.length) return q.answers[0]?.answer_text ?? null
+    if (q?.answer) return q.answer
     return null
 }
 function getCorrectIndex(q) {
-    if (!q.options?.length) return -1
+    if (!q?.options?.length) return -1
 
     return q.options.findIndex(
         option => Number(option.is_correct) === 1
@@ -96,7 +124,7 @@ function getCorrectIndex(q) {
 }
 
 const correctCount = computed(() =>
-    props.past_question.questions.reduce((acc, q, i) => {
+    questions.value.reduce((acc, q, i) => {
         if (isCorrect(q, submittedAnswers.value[i])) {
             return acc + 1
         }
@@ -105,7 +133,7 @@ const correctCount = computed(() =>
 )
 
 const wrongCount = computed(() =>
-    props.past_question.questions.reduce((acc, q, i) => {
+    questions.value.reduce((acc, q, i) => {
         const a = submittedAnswers.value[i]
 
         if (a === undefined || a === '') return acc
@@ -119,13 +147,13 @@ const wrongCount = computed(() =>
 )
 
 const skippedCount = computed(() =>
-    props.past_question.questions.filter((_, i) => {
+    questions.value.filter((_, i) => {
         const a = submittedAnswers.value[i]
         return a === undefined || a === ''
     }).length
 )
 const totalMarksScored = computed(() =>
-    props.past_question.questions.reduce((acc, q, i) => {
+    questions.value.reduce((acc, q, i) => {
         if (isCorrect(q, submittedAnswers.value[i])) {
             return acc + (q.marks ?? 1)
         }
@@ -135,7 +163,7 @@ const totalMarksScored = computed(() =>
 )
 
 const totalMarks = computed(() =>
-    props.past_question.questions.reduce((s, q) => s + (q.marks ?? 1), 0)
+    questions.value.reduce((s, q) => s + (q.marks ?? 1), 0)
 )
 
 const scorePercent = computed(() =>
@@ -147,19 +175,17 @@ function isCorrect(q, userAnswer) {
         return false
     }
 
-    const type = getQuestionType(q)
-
     // MCQ
     if (isMcq(q)) {
-        const ci = q.options?.findIndex(
+        const ci = q?.options?.findIndex(
             o => Number(o.is_correct) === 1
-        )
+        ) ?? -1
 
         return Number(userAnswer) === ci
     }
 
     // Essay / short answer
-    if (q.answers?.length) {
+    if (q?.answers?.length) {
         return q.answers.some(a => {
             const correct = a.answer_text?.toString().trim().toLowerCase()
             const user = userAnswer?.toString().trim().toLowerCase()

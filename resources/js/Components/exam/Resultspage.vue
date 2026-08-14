@@ -36,7 +36,7 @@
                     <p class="text-[12px] m-0 drop-shadow-md font-semibold">
                         {{ grade.action }}
                     </p>
-                    <p class="text-[13px] opacity-85 m-0 mb-3.5">{{ courseCode }} · {{ courseTitle }}</p>
+                    <p class="text-[13px] opacity-85 m-0 mb-3.5">{{ courseCode || 'Course' }}<span v-if="courseTitle"> · {{ courseTitle }}</span></p>
                     <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
             <span class="px-3 py-1 rounded-full text-[12px] font-bold bg-white/30 text-white">
               <b>{{ correctCount }}</b> Correct
@@ -80,7 +80,11 @@
         <div class="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-6 box-border">
             <h2 class="text-[15px] font-extrabold text-gray-900 mb-4 m-0">Review &amp; Corrections</h2>
 
-            <div class="flex flex-col gap-3.5">
+            <div v-if="questions.length === 0" class="text-sm text-gray-400 italic py-6 text-center">
+                No questions to review.
+            </div>
+
+            <div v-else class="flex flex-col gap-3.5">
                 <div
                     v-for="(q, i) in questions"
                     :key="q.id ?? i"
@@ -103,10 +107,21 @@
                         <span class="text-[10px] bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full">
               {{ q.marks ?? 1 }} mk
             </span>
+                        <span v-if="q.answer_source === 'ai_generated'"
+                              class="inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-violet-100 text-violet-700"
+                              title="This answer was suggested by AI, not a human contributor">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              AI Suggested
+            </span>
+                        <span v-if="q.answer_source === 'ai_generated' && q.answer_confidence"
+                              class="text-[10px] font-extrabold px-2.5 py-1 rounded-full"
+                              :class="confidenceBadgeClass(q.answer_confidence)">
+              {{ confidenceLabel(q.answer_confidence) }}
+            </span>
                     </div>
 
                     <!-- Question text -->
-                    <RichText :content="q.question_text" class="text-[14px] font-medium text-gray-900 leading-relaxed block mb-3" />
+                    <RichText :content="q.question_text ?? ''" class="text-[14px] font-medium text-gray-900 leading-relaxed block mb-3" />
 
                     <!-- MCQ options -->
                     <template v-if="isMcq(q)">
@@ -143,9 +158,13 @@
                     <!-- Tip / Explanation -->
                     <div v-if="getAnswerText(q)" class="flex gap-2.5 mt-3 bg-amber-50 border-[1.5px] border-amber-200 rounded-xl p-3 items-start">
                         <span class="text-base flex-shrink-0">💡</span>
-                        <div>
+                        <div class="flex-1">
                             <span class="block text-[10px] font-extrabold text-amber-800 uppercase tracking-wider mb-1">Answer / Explanation</span>
                             <RichText :content="getAnswerText(q)" class="text-[12px] text-amber-900 leading-relaxed" />
+                            <p v-if="q.answer_source === 'ai_generated' && q.answer_confidence === 'low'"
+                               class="text-[11px] text-amber-700 mt-2 mb-0 italic">
+                                This answer was AI-suggested with low confidence — worth verifying against your course material.
+                            </p>
                         </div>
                     </div>
 
@@ -179,17 +198,17 @@ import RichText from './RichText.vue'
 const LETTERS = ['A', 'B', 'C', 'D', 'E']
 
 const props = defineProps({
-    questions: Array,
+    questions: { type: Array, default: () => [] },
     sections: { type: Array, default: () => [] },
-    answers: Object,
-    courseCode: String,
-    courseTitle: String,
-    scorePercent: Number,
-    correctCount: Number,
-    wrongCount: Number,
-    skippedCount: Number,
-    totalMarksScored: Number,
-    totalMarks: Number,
+    answers: { type: Object, default: () => ({}) },
+    courseCode: { type: String, default: '' },
+    courseTitle: { type: String, default: '' },
+    scorePercent: { type: Number, default: 0 },
+    correctCount: { type: Number, default: 0 },
+    wrongCount: { type: Number, default: 0 },
+    skippedCount: { type: Number, default: 0 },
+    totalMarksScored: { type: Number, default: 0 },
+    totalMarks: { type: Number, default: 0 },
 })
 
 defineEmits(['retake'])
@@ -289,7 +308,7 @@ const stats = computed(() => [
 /* ── Helpers ── */
 
 function getQuestionType(q) {
-    return (q.type || q.question_type || 'objective').toLowerCase()
+    return (q?.type || q?.question_type || 'objective').toLowerCase()
 }
 
 function isMcq(q) {
@@ -313,7 +332,7 @@ function isTrueFalse(q) {
 }
 
 function getOptions(q) {
-    if (q.options?.length) {
+    if (q?.options?.length) {
         if (typeof q.options[0] === 'object') {
             return q.options.map(
                 o =>
@@ -340,19 +359,21 @@ function getOptions(q) {
 }
 
 function getAnswerText(q) {
-    if (q.answers?.length) {
-        return q.answers[0]?.answer_text || null
+    if (q?.answers?.length) {
+        return q.answers[0]?.answer_text ?? null
     }
 
-    if (q.answer) {
-        return q.answers.answer_text
+    // Fixed: was reading q.answers.answer_text here, which threw whenever
+    // q.answer was truthy but q.answers was undefined (the common case).
+    if (q?.answer) {
+        return q.answer
     }
 
     return null
 }
 
 function correctIndex(q) {
-    if (!q.options?.length) {
+    if (!q?.options?.length) {
         return -1
     }
 
@@ -361,9 +382,21 @@ function correctIndex(q) {
     )
 }
 
+function confidenceLabel(level) {
+    return { high: 'High confidence', medium: 'Medium confidence', low: 'Low confidence' }[level] ?? level
+}
+
+function confidenceBadgeClass(level) {
+    return {
+        high: 'bg-emerald-100 text-emerald-700',
+        medium: 'bg-amber-100 text-amber-700',
+        low: 'bg-red-100 text-red-700',
+    }[level] ?? 'bg-gray-100 text-gray-500'
+}
+
 function getSectionTitle(q) {
-    const s = props.sections?.find(
-        s => s.id === q.question_section_id
+    const s = props.sections.find(
+        s => s.id === q?.question_section_id
     )
 
     return s?.title || ''

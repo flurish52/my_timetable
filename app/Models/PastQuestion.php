@@ -52,6 +52,22 @@ class PastQuestion extends Model
         return $this->hasMany(QuestionAttempt::class);
     }
 
+    public function scanAttempts()
+    {
+        return $this->hasMany(\App\Models\ScanAttempt::class);
+    }
+
+    public function scopePrivateTo($query, int $userId)
+    {
+        return $query->where('visibility', 'private')->where('created_by', $userId);
+    }
+
+    public function scopePublished($query)
+    {
+        return $query->where('visibility', 'published')->where('status', 'published');
+    }
+
+
 
     protected $fillable = [
         'school_id',
@@ -66,5 +82,7 @@ class PastQuestion extends Model
         'created_by',
         'updated_by',
         'slug',
+        'visibility',
+        'raw_course_label',
     ];
 }

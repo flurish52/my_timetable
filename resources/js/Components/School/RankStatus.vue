@@ -1,4 +1,7 @@
 <script setup>
+import {router} from "@inertiajs/vue3";
+import ScanCTA from "@/Components/ScanCTA.vue";
+
 defineProps({
     schoolName: String,
     joined: Boolean,

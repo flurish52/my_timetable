@@ -73,6 +73,9 @@ class Question extends Model
         'question_text',
         'marks',
         'position',
+        'topic_tag',
+        'answer_source',
+        'answer_confidence',
     ];
 
     protected $casts = [

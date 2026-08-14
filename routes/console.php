@@ -22,3 +22,4 @@ Schedule::call(function () {
 
 Schedule::command('qotd:select')->timezone('Africa/Lagos')->dailyAt('00:05');
 Schedule::command('qotd:notify')->timezone('Africa/Lagos')->dailyAt('06:15');
+Schedule::command('scan:cleanup-files')->daily();

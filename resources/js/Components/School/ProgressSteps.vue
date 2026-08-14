@@ -1,4 +1,7 @@
 <script setup>
+import ScanCTA from "@/Components/ScanCTA.vue";
+import {router} from "@inertiajs/vue3";
+
 defineProps({
     steps: {
         type: Array,

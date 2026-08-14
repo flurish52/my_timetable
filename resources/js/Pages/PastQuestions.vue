@@ -18,7 +18,7 @@
                             </div>
                             <p class="m-0 mb-4 text-[0.95rem] text-gray-500 leading-relaxed">
                                 Browse real past question papers from
-                                <span class="font-medium text-gray-800">Federal College of Education, Obudu</span>
+                                <span class="font-medium text-gray-800">{{$page.props.auth.user.school.name || "Your school" }}</span>
                                 with answers and walk into every exam knowing exactly what to expect,
                                 not just hoping for the best.
                             </p>
@@ -28,16 +28,16 @@
                                     <span class="text-xs text-gray-400">Multiple courses</span>
                                 </div>
                                 <div class="flex items-center gap-1.5">
+                                    <i class="ti ti-books text-base text-gray-400"></i>
+                                    <span class="text-xs text-gray-400">Practice in CBT mode.</span>
+                                </div>
+                                <div class="flex items-center gap-1.5">
                                     <i class="ti ti-circle-check text-base text-green-500"></i>
                                     <span class="text-xs text-gray-400">Answers included</span>
                                 </div>
                                 <div class="flex items-center gap-1.5">
                                     <i class="ti ti-download text-base text-gray-400"></i>
                                     <span class="text-xs text-gray-400">Download instantly</span>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <i class="ti ti-calendar text-base text-gray-400"></i>
-                                    <span class="text-xs text-gray-400">Past sessions included</span>
                                 </div>
                             </div>
                         </div>
@@ -77,6 +77,14 @@
                         <polyline points="14 2 14 8 20 8"/>
                     </svg>
                     <span>No past questions found</span>
+
+
+                    <!-- Empty course state — same component, different copy -->
+                    <ScanCTA
+                        title="Have this paper on hand?"
+                        description="Scan it and start practicing in CBT mode immediately."
+                        @scan="router.visit('/scan')"
+                    />
                 </div>
 
                 <!-- Course List -->
@@ -118,12 +126,18 @@
                             </div>
                         </div>
                     </li>
+
                 </ul>
 
                 <p v-if="coursesWithQuestions.length"
-                   class="mt-4 text-right text-[0.78rem] text-[var(--color-muted,#a0aec0)]">
+                   class="mt-4 text-right text-[0.78rem] text-[var(--color-muted,#a0aec0)] my-2">
                     {{ filtered.length }} of {{ coursesWithQuestions.length }} course{{ coursesWithQuestions.length !== 1 ? 's' : '' }}
                 </p>
+                    <ScanCTA
+                        v-if="filtered.length !== 0"
+                    title="Didn't see the Course you're looking for?"
+                    description="Got any paper at hand?, Scan and start practicing in CBT mode"
+                    />
             </div>
         </div>
 </template>
@@ -131,8 +145,9 @@
 <script setup>
 import { ref, computed } from 'vue'
 import GuestLayout from "@/Layouts/AppLayout.vue"
-import { Head } from "@inertiajs/vue3"
+import {Head, router} from "@inertiajs/vue3"
 import {Link} from "@inertiajs/vue3";
+import ScanCTA from "@/Components/ScanCTA.vue";
 
 const props = defineProps({
     past_questions: Array,

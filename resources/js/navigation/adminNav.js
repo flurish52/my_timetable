@@ -8,4 +8,5 @@ export default [
     { to: '/pastquestions', label: 'Past Questions', icon: icons.pastQuestions },
     // { to: '/admin/settings', label: 'Settings', icon: icons.settings },
     { to: '/questions-of-the-day', label: 'Daily Q', icon: icons.qotd },
+    { to: '/activity', label: 'Activity', icon: icons?.activity },
 ]

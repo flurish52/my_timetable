@@ -23,7 +23,7 @@ class PastQuestionImportController extends Controller
     public function index(PastQuestion $pastQuestion)
     {
         return Inertia::render('PastQuestions/Import', [
-            'pastQuestion' => $pastQuestion->only('id', 'title'),
+         'pastQuestion' => $pastQuestion->only('id', 'title', 'course_id'),
         ]);
     }
 
