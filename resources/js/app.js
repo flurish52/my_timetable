@@ -9,6 +9,8 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import ContributorLayout from "@/Layouts/ContributorLayout.vue";
 import axios from "axios";
 import AdminLayout from "@/Layouts/AdminLayout.vue";
+import GuestLayout from "@/Layouts/GuestLayout.vue";
+import AuthLayout from "@/Layouts/AuthLayout.vue";
 
 const appName = import.meta.env.VITE_APP_NAME || 'myUniAlly';
 
@@ -25,8 +27,8 @@ createInertiaApp({
                 switch (true) {
                     case name.startsWith('Public/'):
                         return AppLayout;
-                    case name.startsWith('auth/'):
-                        return AppLayout;
+                    case name.startsWith('Auth/'):
+                        return AuthLayout;
                     case name.startsWith('settings/'):
                         return AppLayout;
                     case name.startsWith('PastQuestions/'):
@@ -35,12 +37,18 @@ createInertiaApp({
                         return ContributorLayout;
                     case name.startsWith('Contributor/'):
                         return ContributorLayout;
-                        case name.startsWith('Admin/'):
+                    case name.startsWith('Admin/'):
                         return AdminLayout;
                     case name.startsWith('Timetable/'):
                         return ContributorLayout;
-                    default:
+                    case name.startsWith('Dashboard'):
                         return AppLayout;
+                    case name.startsWith('Welcome'):
+                        return GuestLayout;
+                        case name.startsWith('LegalNotice/'):
+                        return GuestLayout;
+                    default:
+                        return AppLayout
                 }
             })();
             return module;

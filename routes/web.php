@@ -30,7 +30,7 @@ use Inertia\Inertia;
 | Public routes
 |--------------------------------------------------------------------------
 */
-Route::get('/', [PastQuestionController::class, 'index'])->name('pastquestions.get');
+Route::get('/', [HomeController::class, 'index'])->name('home.index');
 Route::get('/pastquestions', [PastQuestionController::class, 'index'])->name('view.past_questions');
 Route::get('/pastquestions/{slug}', [PastQuestionController::class, 'showCoursePapers'])
     ->name('view.past_questions_per_course');
@@ -73,7 +73,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,student,contributor'])->group(function () {
-    Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
     Route::get('/contributors', [ContributorController::class, 'index'])->name('contributors.public');
     Route::get('/full_timetable', [TimeTableController::class, 'viewFullTimetable'])->name('view.full_timetable');
 

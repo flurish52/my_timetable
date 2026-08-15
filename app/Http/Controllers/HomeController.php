@@ -16,7 +16,19 @@ class HomeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+
+        public function index()
+        {
+
+            return inertia::render('Welcome', [
+
+            ]);
+
+
+    }
+
+
+    public function dashboard()
     {
         $user = Auth::user();
 
@@ -62,7 +74,7 @@ class HomeController extends Controller
             ->whereIn('course_id', $courseIds)
             ->get();
 
-        return Inertia::render('Welcome', [
+        return Inertia::render('Dashboard', [
             'timetable' => $timetable,
             'programme' => Programme::find($user->programme_id),
             'user' => $user,
