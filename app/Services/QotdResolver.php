@@ -28,6 +28,19 @@ class QotdResolver
             }
         }
 
+        // No course-scope QOTD available — either the user has no course set,
+        // or their course has no published past questions yet. Fall back to
+        // a personal question drawn from their own scanned papers, if the
+        // daily select command created one for them today.
+        $personalQotd = QuestionOfTheDay::where('date', $date)
+            ->where('scope_type', 'personal')
+            ->where('user_id', $user->id)
+            ->first();
+
+        if ($personalQotd) {
+            return $personalQotd;
+        }
+
         return QuestionOfTheDay::where('date', $date)
             ->where('scope_type', 'general')
             ->first();

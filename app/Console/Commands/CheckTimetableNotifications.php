@@ -81,8 +81,8 @@ class CheckTimetableNotifications extends Command
                         ->toArray();
                     $this->sendPushToTokens(
                         $tokens,
-                        'Hi, Good evening 😊',
-                        'You are done for today. Take it easy and relax.'
+                        'How well do you know your courses? 🤔',
+                        'A few past questions on myUniAlly could tell you. Tap in →'
                     );
                 });
         }

@@ -13,6 +13,7 @@ use App\Models\ScanAttempt;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -23,7 +24,7 @@ use Smalot\PdfParser\Parser as PdfParser;
 
 class ScanController extends Controller
 {
-    private const DAILY_SCAN_LIMIT = 3;
+    private const DAILY_SCAN_LIMIT = 5;
 
     private const MAX_IMAGES_PER_SCAN = 6;
 
@@ -42,39 +43,40 @@ class ScanController extends Controller
     }
 
 
-public function store(Request $request): RedirectResponse
-{
-    $request->validate([
-        'images' => ['required', 'array', 'min:1', 'max:'.self::MAX_IMAGES_PER_SCAN],
-        'images.*' => ['file', 'mimes:jpeg,jpg,png,pdf', 'max:8192'],
-        'course_id' => ['nullable', 'integer', 'exists:courses,id'],
-    ]);
-
-    $files = $request->file('images');
-    $pdfCount = collect($files)->filter(fn ($f) => $f->getClientMimeType() === 'application/pdf')->count();
-
-    // A PDF replaces the whole batch — no mixing PDF + photos, and only one PDF at a time.
-    if ($pdfCount > 0 && count($files) > 1) {
-        return back()->withErrors([
-            'images' => 'Upload either a single PDF or up to '.self::MAX_IMAGES_PER_SCAN.' photos — not both.',
+    public function store(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'images' => ['required', 'array', 'min:1', 'max:'.self::MAX_IMAGES_PER_SCAN],
+            'images.*' => ['file', 'mimes:jpeg,jpg,png,pdf', 'max:8192'],
+            'course_id' => ['nullable', 'integer', 'exists:courses,id'],
         ]);
-    }
 
-    // PDF page count is the real cost driver — check it before touching Gemini at all.
-    if ($pdfCount === 1) {
-        $pageCount = (new PdfParser())->parseFile($files[0]->getRealPath())->getPages();
+        $files = $request->file('images');
+        $pdfCount = collect($files)->filter(fn ($f) => $f->getClientMimeType() === 'application/pdf')->count();
 
-        if (count($pageCount) > self::MAX_IMAGES_PER_SCAN) {
+        // A PDF replaces the whole batch — no mixing PDF + photos, and only one PDF at a time.
+        if ($pdfCount > 0 && count($files) > 1) {
             return back()->withErrors([
-                'images' => 'That PDF has '.count($pageCount).' pages — max '.self::MAX_IMAGES_PER_SCAN.' pages per scan.',
+                'images' => 'Upload either a single PDF or up to '.self::MAX_IMAGES_PER_SCAN.' photos — not both.',
             ]);
         }
-    }
+
+        // PDF page count is the real cost driver — check it before touching Gemini at all.
+        if ($pdfCount === 1) {
+            $pageCount = (new PdfParser())->parseFile($files[0]->getRealPath())->getPages();
+
+            if (count($pageCount) > self::MAX_IMAGES_PER_SCAN) {
+                return back()->withErrors([
+                    'images' => 'That PDF has '.count($pageCount).' pages — max '.self::MAX_IMAGES_PER_SCAN.' pages per scan.',
+                ]);
+            }
+        }
 
         $user = $request->user();
 
         $todaysScanCount = ScanAttempt::where('user_id', $user->id)
             ->whereDate('created_at', today())
+            ->whereIn('status', ['success', 'rejected'])
             ->count();
 
         if ($todaysScanCount >= self::DAILY_SCAN_LIMIT) {
@@ -101,14 +103,28 @@ public function store(Request $request): RedirectResponse
         try {
             $result = $this->extractor->extract($fullPaths);
         } catch (Throwable $e) {
+            // Log the real error internally, but NEVER expose $e->getMessage()
+            // to the user — for HTTP client exceptions (e.g. cURL/connection
+            // errors calling Gemini) the message contains the full request
+            // URL, including the API key in the query string. Only safe,
+            // non-sensitive details go into rejection_reason and the flash
+            // error shown to the user.
+            Log::error('Scan extraction failed', [
+                'scan_attempt_id' => $scanAttempt->id,
+                'exception' => get_class($e),
+                'code' => $e->getCode(),
+            ]);
+
             $scanAttempt->update([
                 'status' => 'failed',
-                'rejection_reason' => $e->getMessage(),
+                'rejection_reason' => 'Extraction failed: '.get_class($e),
             ]);
 
             // Files stay on disk for the 24-48h retry window per policy —
             // the scheduled cleanup command purges them later regardless of status.
-            return back()->withErrors(['images' => $e->getMessage()]);
+            return back()->withErrors([
+                'images' => 'We couldn\'t process your scan right now. Please try again in a moment.',
+            ]);
         }
 
         $isInvalid = ! $result['is_valid_question_paper'];
@@ -135,9 +151,16 @@ public function store(Request $request): RedirectResponse
                 return $this->buildPastQuestion($result, $courseId, $user->id);
             });
         } catch (Throwable $e) {
+            // Same rule as above — log the real exception, never surface
+            // $e->getMessage() to the user or store it verbatim.
+            Log::error('Failed to save extracted past question', [
+                'scan_attempt_id' => $scanAttempt->id,
+                'exception' => get_class($e),
+            ]);
+
             $scanAttempt->update([
                 'status' => 'failed',
-                'rejection_reason' => 'Failed to save extracted questions: '.$e->getMessage(),
+                'rejection_reason' => 'Failed to save extracted questions.',
                 'raw_ai_response' => $result,
             ]);
 

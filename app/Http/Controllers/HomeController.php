@@ -17,14 +17,27 @@ class HomeController extends Controller
      * Display a listing of the resource.
      */
 
-        public function index()
-        {
+    public function index()
+    {
+        $isPwa = request()->query('source') === 'pwa';
 
-            return inertia::render('Welcome', [
+        // Browser, not logged in → show the marketing landing page
+        if (!$isPwa && !auth()->check()) {
+            return Inertia::render('Welcome', []);
+        }
 
-            ]);
+        // PWA, not logged in → skip landing page, go straight to login
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
 
+        $user = auth()->user();
 
+        if ($user->hasAnyRole(['admin', 'student', 'contributor']) && $user->profileSetupComplete) {
+            return redirect()->route('dashboard');
+        }
+
+        return redirect()->route('activity.index');
     }
 
 

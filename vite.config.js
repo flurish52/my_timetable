@@ -31,7 +31,7 @@ export default defineConfig({
             manifest: {
                 name: 'myUniAlly',
                 short_name: 'myUniAlly',
-                start_url: '/',
+                start_url: '/?source=pwa',
                 scope: '/',
                 display: 'standalone',
                 background_color: '#ffffff',

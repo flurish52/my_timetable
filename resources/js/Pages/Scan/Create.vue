@@ -18,6 +18,12 @@ const page = usePage()
 const MAX_FILES = 6
 const MAX_FILE_BYTES = 8 * 1024 * 1024 // 8MB, mirrors ScanController::store() validation
 
+// Compression targets — tuned so OCR/vision extraction stays accurate while
+// keeping uploads small and fast on mobile data.
+const COMPRESS_MAX_DIMENSION = 2000 // px, longest side
+const COMPRESS_TARGET_BYTES = 1024 * 1024 // ~1MB target
+const COMPRESS_MIN_QUALITY = 0.5 // floor — below this, text starts blurring
+
 const form = useForm({
     images: [],
     course_id: props.course?.id ?? null,
@@ -31,6 +37,7 @@ let nextPreviewId = 0
 const fileError = ref('')
 const isDragging = ref(false)
 const dragDepth = ref(0)
+const isProcessingFiles = ref(false) // true while client-side compression is running
 
 // Phase drives the loading copy. Upload has real progress; extraction doesn't
 // (Gemini's a black box from the client's side), so it gets rotating messages
@@ -58,10 +65,68 @@ function stopExtractingRotation() {
 
 const hasPdf = computed(() => previews.value.some((p) => p.isPdf))
 const remainingSlots = computed(() => MAX_FILES - previews.value.length)
-const canAddMore = computed(() => !hasPdf.value && remainingSlots.value > 0)
-const canSubmit = computed(() => previews.value.length > 0 && phase.value === 'idle')
+const canAddMore = computed(() => !hasPdf.value && remainingSlots.value > 0 && !isProcessingFiles.value)
+const canSubmit = computed(() => previews.value.length > 0 && phase.value === 'idle' && !isProcessingFiles.value)
 
-function addFiles(fileList) {
+/**
+ * Compresses an image file client-side before upload.
+ *
+ * Why: raw camera photos (12MP+, often 8-15MB) fail PHP's upload_max_filesize
+ * on shared hosting, are slow/expensive on mobile data, and carry far more
+ * resolution than OCR/vision extraction needs. Resizing to ~2000px on the
+ * longest side plus JPEG re-encoding cuts file size dramatically with no
+ * meaningful loss in text legibility.
+ *
+ * Bonus: re-encoding through canvas strips any non-image data appended to
+ * the original file (a basic defense against polyglot/embedded-payload
+ * files), since only actual pixel data survives the round trip.
+ *
+ * imageOrientation: 'from-image' auto-applies EXIF rotation, so sideways
+ * camera photos come out upright without a separate EXIF-reading step.
+ */
+async function compressImage(file, {
+    maxDimension = COMPRESS_MAX_DIMENSION,
+    targetBytes = COMPRESS_TARGET_BYTES,
+    minQuality = COMPRESS_MIN_QUALITY,
+} = {}) {
+    let bitmap
+    try {
+        bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
+    } catch (e) {
+        // Decoding failed (corrupt file, unsupported format like some HEIC
+        // variants) — fall back to the original and let server validation
+        // reject it with a proper message rather than failing silently here.
+        return file
+    }
+
+    let { width, height } = bitmap
+    if (width > maxDimension || height > maxDimension) {
+        const scale = maxDimension / Math.max(width, height)
+        width = Math.round(width * scale)
+        height = Math.round(height * scale)
+    }
+
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height)
+    bitmap.close?.()
+
+    let quality = 0.85
+    let blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality))
+
+    while (blob && blob.size > targetBytes && quality > minQuality) {
+        quality -= 0.1
+        blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality))
+    }
+
+    if (!blob) return file // compression failed — fall back to original
+
+    const newName = file.name.replace(/\.\w+$/, '.jpg')
+    return new File([blob], newName, { type: 'image/jpeg' })
+}
+
+async function addFiles(fileList) {
     fileError.value = ''
     const incoming = Array.from(fileList)
 
@@ -70,7 +135,9 @@ function addFiles(fileList) {
     const incomingPdf = incoming.find((f) => f.type === 'application/pdf')
 
     // A PDF replaces the whole batch — server enforces this too, but catching it
-    // client-side avoids a wasted round trip.
+    // client-side avoids a wasted round trip. PDFs are left uncompressed:
+    // scanner-app exports are already reasonably sized, and client-side PDF
+    // recompression needs a much heavier library for little practical gain.
     if (incomingPdf) {
         if (incoming.length > 1) {
             fileError.value = 'Upload either a single PDF or up to 6 photos — not both together.'
@@ -83,7 +150,7 @@ function addFiles(fileList) {
         // A PDF's actual page count can only be verified server-side (needs to
         // open the file), so we just swap in the single PDF and let the backend
         // reject it after upload if it has too many pages.
-        previews.value.forEach((p) => URL.revokeObjectURL(p.url))
+        previews.value.forEach((p) => p.url && URL.revokeObjectURL(p.url))
         previews.value = [{ id: nextPreviewId++, file: incomingPdf, url: null, isPdf: true }]
         syncFormImages()
         return
@@ -100,20 +167,34 @@ function addFiles(fileList) {
         return
     }
 
-    const accepted = []
-    const rejectedReasons = new Set()
+    const candidateImages = incoming.filter((f) => f.type.startsWith('image/'))
+    const nonImageCount = incoming.length - candidateImages.length
 
-    for (const file of incoming) {
-        if (!file.type.startsWith('image/')) {
-            rejectedReasons.add('Only image files (or a single PDF) are allowed.')
-            continue
-        }
-        if (file.size > MAX_FILE_BYTES) {
-            rejectedReasons.add('Each image must be under 8MB.')
-            continue
-        }
-        accepted.push(file)
+    const rejectedReasons = new Set()
+    if (nonImageCount > 0) {
+        rejectedReasons.add('Only image files (or a single PDF) are allowed.')
     }
+
+    if (!candidateImages.length) {
+        if (rejectedReasons.size) fileError.value = Array.from(rejectedReasons).join(' ')
+        return
+    }
+
+    isProcessingFiles.value = true
+    let compressed
+    try {
+        compressed = await Promise.all(candidateImages.map((f) => compressImage(f)))
+    } finally {
+        isProcessingFiles.value = false
+    }
+
+    const accepted = compressed.filter((f) => {
+        if (f.size > MAX_FILE_BYTES) {
+            rejectedReasons.add('One of your photos is still too large even after compression.')
+            return false
+        }
+        return true
+    })
 
     const overflow = accepted.length > room
     const toAdd = accepted.slice(0, room)
@@ -205,9 +286,18 @@ const uploadProgressPct = computed(() => form.progress?.percentage ?? 0)
 
 const scanError = computed(() => page.props.flash?.scan_error ?? null)
 
+// Laravel returns per-index keys like "images.0" for file upload failures
+// (e.g. a file failing PHP's upload check), not a flat "images" key — check
+// for both so an upload failure never silently fails to display.
+const imagesError = computed(() => {
+    if (form.errors.images) return form.errors.images
+    const indexedKey = Object.keys(form.errors).find((k) => k.startsWith('images.'))
+    return indexedKey ? form.errors[indexedKey] : null
+})
+
 onBeforeUnmount(() => {
     stopExtractingRotation()
-    previews.value.forEach((p) => URL.revokeObjectURL(p.url))
+    previews.value.forEach((p) => p.url && URL.revokeObjectURL(p.url))
 })
 
 const goBack = () => {
@@ -265,6 +355,19 @@ const goBack = () => {
                 <div class="text-sm text-amber-800">{{ scanError }}</div>
             </div>
 
+            <!-- Upload/validation error from the server (e.g. a file failing PHP's
+                 upload check) — shown as a clear banner, not just a thin caption,
+                 so it isn't easy to miss on mobile. -->
+            <div
+                v-if="imagesError"
+                class="mb-5 flex gap-3 rounded-xl border border-red-200 bg-red-50 p-4"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 shrink-0 text-red-500">
+                    <path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+                <div class="text-sm text-red-800">{{ imagesError }}</div>
+            </div>
+
             <!-- If arriving without a course, let the student tell us what it's for -->
             <div v-if="!course" class="mb-5">
                 <label for="raw_course_label" class="mb-1.5 block text-sm font-medium text-slate-700">
@@ -302,7 +405,14 @@ const goBack = () => {
                     @change="onFileInputChange"
                 />
 
-                <template v-if="previews.length === 0">
+                <template v-if="isProcessingFiles">
+                    <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                        <svg class="h-6 w-6 animate-spin text-primary" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" /><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                    </div>
+                    <p class="text-sm font-medium text-slate-700">Processing photo...</p>
+                </template>
+
+                <template v-else-if="previews.length === 0">
                     <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-slate-400">
                             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
@@ -364,7 +474,6 @@ const goBack = () => {
             </div>
 
             <p v-if="fileError" class="mt-2 text-xs text-red-600">{{ fileError }}</p>
-            <p v-if="form.errors.images" class="mt-2 text-xs text-red-600">{{ form.errors.images }}</p>
 
             <!-- Submit -->
             <button
