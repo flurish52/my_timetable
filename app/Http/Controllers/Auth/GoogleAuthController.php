@@ -4,18 +4,28 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 class GoogleAuthController extends Controller
 {
-    public function redirect()
+    public function redirect(Request $request)
     {
+        // Stash the page the user was on before we send them off to Google —
+        // this round trip loses everything except what we deliberately persist,
+        // and the session is the one thing that survives it.
+        $currentUrl = $request->query('current_url');
+
+        if ($currentUrl && str_starts_with($currentUrl, config('app.url'))) {
+            $request->session()->put('post_login_redirect', $currentUrl);
+        }
+
         return Socialite::driver('google')->redirect();
     }
 
-    public function callback()
+    public function callback(Request $request)
     {
         $googleUser = Socialite::driver('google')->stateless()->user();
 
@@ -24,8 +34,6 @@ class GoogleAuthController extends Controller
             ->first();
 
         if ($user) {
-            // Existing account (possibly created via normal registration) —
-            // link the Google ID if it wasn't already, then log in.
             if (! $user->google_id) {
                 $user->update(['google_id' => $googleUser->getId()]);
             }
@@ -42,6 +50,7 @@ class GoogleAuthController extends Controller
         }
 
         Auth::login($user, remember: true);
+        $user->update(['is_online' => true, 'last_login_at' => now()]);
 
         // New Google users won't have programme_id/level_id set yet —
         // route them to complete their profile instead of straight to dashboard.
@@ -49,7 +58,13 @@ class GoogleAuthController extends Controller
             return redirect()->route('setup.store');
         }
 
-        return redirect()->route('dashboard');
+        $redirectUrl = $request->session()->pull('post_login_redirect');
+
+        if ($redirectUrl) {
+            return redirect()->to($redirectUrl);
+        }
+
+        return redirect()->route('home');
     }
 
     private function generateUniqueUsername(string $name): string

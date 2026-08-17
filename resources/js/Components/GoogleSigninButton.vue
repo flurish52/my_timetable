@@ -23,16 +23,25 @@ const props = defineProps({
 
 const isLoading = ref(false)
 
+
+// Append the current page as a query param so the backend can stash it in
+// session before redirecting to Google, and return here after auth completes.
+const finalHref = computed(() => {
+    const url = new URL(props.href, window.location.origin)
+    url.searchParams.set('current_url', window.location.href)
+    return url.toString()
+})
 function handleClick() {
     // Just drives the visual loading state before the browser
     // navigates away — no need to prevent default.
     isLoading.value = true
 }
+
 </script>
 
 <template>
     <a
-        :href="href"
+        :href="finalHref"
         @click="handleClick"
         class="google-btn"
         :class="{ 'is-loading': isLoading }"
