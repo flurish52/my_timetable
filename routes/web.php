@@ -91,6 +91,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/practice/{past_question}/start', [PastQuestionController::class, 'practice'])
         ->name('view.practice');
 
+    Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
 });
 
 /*
@@ -101,7 +102,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 */
 Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,student,contributor'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
     Route::get('/full_timetable', [TimeTableController::class, 'viewFullTimetable'])->name('view.full_timetable');
 
     Route::get('/course_offerings', [CourseOfferingController::class, 'studentCoursesOfferings'])

@@ -64,7 +64,7 @@ class GoogleAuthController extends Controller
             return redirect()->to($redirectUrl);
         }
 
-        return redirect()->route('home');
+        return redirect()->route('home.index');
     }
 
     private function generateUniqueUsername(string $name): string
