@@ -16,10 +16,15 @@ class GoogleAuthController extends Controller
         // Stash the page the user was on before we send them off to Google —
         // this round trip loses everything except what we deliberately persist,
         // and the session is the one thing that survives it.
-        $currentUrl = $request->query('current_url');
+        if (! $request->session()->has('post_login_redirect')) {
+            $intended = $request->session()->get('url.intended');
+            $currentUrl = $request->query('current_url');
 
-        if ($currentUrl && str_starts_with($currentUrl, config('app.url'))) {
-            $request->session()->put('post_login_redirect', $currentUrl);
+            $target = $intended ?: $currentUrl;
+
+            if ($target && str_starts_with($target, config('app.url'))) {
+                $request->session()->put('post_login_redirect', $target);
+            }
         }
 
         return Socialite::driver('google')->redirect();
@@ -54,15 +59,18 @@ class GoogleAuthController extends Controller
 
         // New Google users won't have programme_id/level_id set yet —
         // route them to complete their profile instead of straight to dashboard.
-        if (! $user->programme_id) {
-            return redirect()->route('setup.store');
-        }
+
 
         $redirectUrl = $request->session()->pull('post_login_redirect');
 
         if ($redirectUrl) {
             return redirect()->to($redirectUrl);
         }
+
+        if (! $user->programme_id) {
+            return redirect()->route('setup.store');
+        }
+
 
         return redirect()->route('home.index');
     }
