@@ -1,7 +1,6 @@
 <script setup>
 import {Head, Link} from '@inertiajs/vue3'
 import {ref} from 'vue'
-import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import ScanCTA from "@/Components/ScanCTA.vue";
 
 const scanStep = ref(3)
@@ -274,7 +273,7 @@ const steps = [
                         library grow, and see your name climb your school's leaderboard.
                     </p>
                     <Link
-                        href="/register"
+                        href="/become-contributor"
                         class="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:opacity-90"
                     >
                         Join as a contributor

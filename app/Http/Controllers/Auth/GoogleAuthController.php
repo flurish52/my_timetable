@@ -72,7 +72,7 @@ class GoogleAuthController extends Controller
         }
 
 
-        return redirect()->route('home.index');
+        return redirect()->route('dashboard');
     }
 
     private function generateUniqueUsername(string $name): string

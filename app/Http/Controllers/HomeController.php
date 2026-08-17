@@ -45,6 +45,10 @@ class HomeController extends Controller
     {
         $user = Auth::user();
 
+        if ($user->roles->pluck('name')->sole() === 'independent') {
+            return redirect('/activity');
+        }
+
         $currentSemesterId = ProgrammeLevelSemester::where('programme_id', $user->programme_id)
             ->where('level_id', $user->level_id)
             ->value('semester_id');
