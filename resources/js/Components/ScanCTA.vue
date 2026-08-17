@@ -1,7 +1,7 @@
 <template>
     <Link
         :href="href"
-        class="block rounded-lg border-2 border-dashed p-3 no-underline transition hover:opacity-90"
+        class="block rounded-lg border-2 border-dashed my-4 p-3 no-underline transition hover:opacity-90"
         style="border-color:#1d9e75;background:#e1f5ee"
     >
         <div class="mb-1 flex items-center gap-2">

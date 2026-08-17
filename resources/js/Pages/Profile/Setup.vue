@@ -1,11 +1,13 @@
 <script setup>
 import {computed} from 'vue'
-import {Head, useForm} from '@inertiajs/vue3'
+import {Head, router, useForm} from '@inertiajs/vue3'
 import GuestLayout from "@/Layouts/AppLayout.vue"
 import SearchableSelect from "@/Components/SearchableSelect.vue"
 import StepLabel from "@/Components/Setup/StepLabel.vue"
 import WaitlistNotice from "@/Components/Setup/WaitlistNotice.vue"
 import LegalAgreementNotice from "@/Components/LegalAgreementNotice.vue";
+import ScanCTA from "@/Components/ScanCTA.vue";
+import ScansTab from "@/Components/Activity/ScansTab.vue";
 
 const props = defineProps({
     user: Object,
@@ -137,6 +139,7 @@ const submit = () => {
 
                 <!-- Waitlist notice -->
                 <WaitlistNotice v-if="isWaitlist" :school-name="currentSchool?.name"/>
+                <ScanCTA v-if="isWaitlist" @scan="router.visit('/scan')"/>
 
                 <!-- Department -->
                 <div v-if="!isWaitlist" class="space-y-1.5">

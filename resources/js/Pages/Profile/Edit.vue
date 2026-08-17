@@ -1,5 +1,4 @@
 <script setup>
-import GuestLayout from '@/Layouts/AppLayout.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 
@@ -147,7 +146,7 @@ function formatLastLogin(dateStr) {
                                 <svg class="w-3.5 h-3.5 text-primary" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zm9.75-4.5a1.125 1.125 0 00-1.125 1.125v10.125c0 .621.504 1.125 1.125 1.125h2.25c.621 0 1.125-.504 1.125-1.125V9.75A1.125 1.125 0 0014.625 8.625h-2.25z" />
                                 </svg>
-                                {{ user?.level.name ?? '—' }}
+                                {{ user?.level?.name ?? '—' }}
                             </span>
                             <span class="flex items-center gap-1.5 text-xs text-gray-500 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">
                                 <svg class="w-3.5 h-3.5 text-primary" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">

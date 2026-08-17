@@ -6,8 +6,10 @@ import studentNav from '@/navigation/studentNav'
 import lecturerNav from '@/navigation/lecturerNav'
 import contributorNav from '@/navigation/contributorNav'
 import adminNav from '@/navigation/adminNav'
+import IndependentNav from "@/navigation/independentNav.js";
 
 const navMap = {
+    independent: IndependentNav,
     student: studentNav,
     lecturer: lecturerNav,
     contributor: contributorNav,

@@ -12,7 +12,7 @@ defineProps({
         </svg>
         <p class="text-xs text-amber-700 leading-relaxed">
             <span class="font-medium">{{ schoolName || 'This school' }}</span>
-            hasn't been fully set up yet — no departments are available. Join the waitlist and we'll notify you as soon as it's ready.
+            hasn't been fully set up yet, no departments or course materials are available. Join the waitlist and we'll notify you as soon as it's ready.
         </p>
     </div>
 </template>

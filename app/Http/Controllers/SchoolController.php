@@ -59,6 +59,9 @@ class SchoolController extends Controller
                 'waitlist_joined_at' => now(),
             ]);
         }
+        $user->syncRoles(['independent']);
+
+
 
         return redirect("/schools/{$school->acronym}");
     }

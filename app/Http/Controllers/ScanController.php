@@ -30,7 +30,9 @@ class ScanController extends Controller
 
     public function __construct(
         private readonly QuestionExtractorContract $extractor
-    ) {}
+    )
+    {
+    }
 
     public function create(Request $request, ?string $courseId = null): Response
     {
@@ -46,18 +48,18 @@ class ScanController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'images' => ['required', 'array', 'min:1', 'max:'.self::MAX_IMAGES_PER_SCAN],
+            'images' => ['required', 'array', 'min:1', 'max:' . self::MAX_IMAGES_PER_SCAN],
             'images.*' => ['file', 'mimes:jpeg,jpg,png,pdf', 'max:8192'],
             'course_id' => ['nullable', 'integer', 'exists:courses,id'],
         ]);
 
         $files = $request->file('images');
-        $pdfCount = collect($files)->filter(fn ($f) => $f->getClientMimeType() === 'application/pdf')->count();
+        $pdfCount = collect($files)->filter(fn($f) => $f->getClientMimeType() === 'application/pdf')->count();
 
         // A PDF replaces the whole batch — no mixing PDF + photos, and only one PDF at a time.
         if ($pdfCount > 0 && count($files) > 1) {
             return back()->withErrors([
-                'images' => 'Upload either a single PDF or up to '.self::MAX_IMAGES_PER_SCAN.' photos — not both.',
+                'images' => 'Upload either a single PDF or up to ' . self::MAX_IMAGES_PER_SCAN . ' photos — not both.',
             ]);
         }
 
@@ -67,7 +69,7 @@ class ScanController extends Controller
 
             if (count($pageCount) > self::MAX_IMAGES_PER_SCAN) {
                 return back()->withErrors([
-                    'images' => 'That PDF has '.count($pageCount).' pages — max '.self::MAX_IMAGES_PER_SCAN.' pages per scan.',
+                    'images' => 'That PDF has ' . count($pageCount) . ' pages — max ' . self::MAX_IMAGES_PER_SCAN . ' pages per scan.',
                 ]);
             }
         }
@@ -89,7 +91,7 @@ class ScanController extends Controller
         $fullPaths = [];
 
         foreach ($request->file('images') as $file) {
-            $path = $file->store('scans/'.$user->id, 'local');
+            $path = $file->store('scans/' . $user->id, 'local');
             $paths[] = $path;
             $fullPaths[] = Storage::disk('local')->path($path);
         }
@@ -117,7 +119,7 @@ class ScanController extends Controller
 
             $scanAttempt->update([
                 'status' => 'failed',
-                'rejection_reason' => 'Extraction failed: '.get_class($e),
+                'rejection_reason' => 'Extraction failed: ' . get_class($e),
             ]);
 
             // Files stay on disk for the 24-48h retry window per policy —
@@ -127,8 +129,8 @@ class ScanController extends Controller
             ]);
         }
 
-        $isInvalid = ! $result['is_valid_question_paper'];
-        $isMixedPaper = ! ($result['is_single_paper'] ?? true);
+        $isInvalid = !$result['is_valid_question_paper'];
+        $isMixedPaper = !($result['is_single_paper'] ?? true);
 
         if ($isInvalid || $isMixedPaper) {
             $scanAttempt->update([
@@ -150,7 +152,15 @@ class ScanController extends Controller
             $pastQuestion = DB::transaction(function () use ($result, $courseId, $user) {
                 return $this->buildPastQuestion($result, $courseId, $user->id);
             });
-        } catch (Throwable $e) {
+        } catch (\App\Exceptions\AiServiceRateLimitedException $e) {
+            Log::warning('Scan extraction rate limited', ['scan_attempt_id' => $scanAttempt->id,]);
+
+            $scanAttempt->update(['status' => 'failed',
+                'rejection_reason' => 'Rate limited by AI provider.',]);
+
+            return back()->withErrors(['images' => 'We\'re seeing high traffic right now. Please wait a minute and try scanning again.',]);
+        } catch
+        (Throwable $e) {
             // Same rule as above — log the real exception, never surface
             // $e->getMessage() to the user or store it verbatim.
             Log::error('Failed to save extracted past question', [
@@ -210,10 +220,10 @@ class ScanController extends Controller
             'semester_id' => null,
             'school_id' => null,
             'session' => 'Unspecified',
-            'title' => $result['course_guess'] ?? 'Scanned Paper_'.$userId,
+            'title' => $result['course_guess'] ?? 'Scanned Paper_' . $userId,
             'status' => 'draft',
             'visibility' => 'private',
-            'slug' => Str::slug(($result['course_guess'] ?? 'scanned-paper').'-'.Str::random(6)),
+            'slug' => Str::slug(($result['course_guess'] ?? 'scanned-paper') . '-' . Str::random(6)),
             'source_file' => 'scan',
             'created_by' => $userId,
         ]);
@@ -227,7 +237,7 @@ class ScanController extends Controller
         foreach ($result['questions'] as $index => $q) {
             $label = $q['section_label'] ?? 'Section A';
 
-            if (! isset($sections[$label])) {
+            if (!isset($sections[$label])) {
                 $sections[$label] = QuestionSection::create([
                     'past_question_id' => $pastQuestion->id,
                     'title' => $label,
@@ -248,7 +258,7 @@ class ScanController extends Controller
                 'answer_confidence' => $q['answer_confidence'] ?? null,
             ]);
 
-            if (! empty($q['options'])) {
+            if (!empty($q['options'])) {
                 foreach ($q['options'] as $optionText) {
                     $letter = strtoupper(trim(substr($optionText, 0, 1)));
                     QuestionOption::create([

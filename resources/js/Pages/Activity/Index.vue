@@ -39,6 +39,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
+import {Head} from "@inertiajs/vue3";
 
 import ScansTab from '@/Components/Activity/ScansTab.vue'
 import PracticeHistoryTab from '@/Components/Activity/PracticeHistoryTab.vue'

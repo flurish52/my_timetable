@@ -90,16 +90,27 @@ PROMPT;
             'json' => $response->json(),
         ]);
 
+        if ($response->status() === 429) {
+            Log::warning('Gemini rate limited', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            throw new \App\Exceptions\AiServiceRateLimitedException(
+                'Gemini rate limit hit: ' . $response->body()
+            );
+        }
+
         if ($response->failed()) {
             throw new RuntimeException(
-                'Gemini returned HTTP ' . $response->status() . ': ' . $response->body()
+                'AI returned HTTP ' . $response->status() . ': ' . $response->body()
             );
         }
 
         $text = data_get($response->json(), 'candidates.0.content.parts.0.text');
 
         if (! $text) {
-            throw new RuntimeException('The AI service returned an empty response.');
+            throw new RuntimeException('The AI service returned an empty response, Please try again.');
         }
 
         return $this->parseAndValidate($text);

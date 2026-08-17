@@ -45,8 +45,10 @@ createInertiaApp({
                         return AppLayout;
                     case name.startsWith('Welcome'):
                         return GuestLayout;
-                        case name.startsWith('LegalNotice/'):
+                    case name.startsWith('LegalNotice/'):
                         return GuestLayout;
+                    case name.startsWith('Activity/'):
+                        return AppLayout;
                     default:
                         return AppLayout
                 }

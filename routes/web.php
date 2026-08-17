@@ -46,6 +46,11 @@ Route::get('/privacy_policy', fn () => Inertia::render('LegalNotice/PrivacyPolic
 Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
 
+Route::get('/scan/{course?}', [ScanController::class, 'create'])->name('scan.create');
+Route::get('/pastquestions/{slug}/{question_slug}', [PastQuestionController::class, 'startPractice'])
+    ->name('view.start_practice');
+
+
 /*
 |--------------------------------------------------------------------------
 | Shared onboarding routes (any authenticated role, before profile setup)
@@ -59,43 +64,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/schools/{slug}/waitlist', [SchoolController::class, 'join'])->name('schools.waitlist.join');
     Route::get('/leaderboard', [SchoolController::class, 'leaderboard'])->name('schools.leaderboard');
 
-    Route::get('/scan/{course?}', [ScanController::class, 'create'])->name('scan.create');
     Route::post('/scan', [ScanController::class, 'store'])->name('scan.store');
     Route::get('/scan/review/{pastQuestion}', [ScanController::class, 'review'])->name('scan.review');
 
     Route::get('/activity', [ActivityController::class, 'index'])->name('activity.index');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Student routes
-| Accessible by: student, contributor, admin
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,student,contributor'])->group(function () {
-    Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
-    Route::get('/contributors', [ContributorController::class, 'index'])->name('contributors.public');
-    Route::get('/full_timetable', [TimeTableController::class, 'viewFullTimetable'])->name('view.full_timetable');
-
-    Route::get('/pastquestions/{slug}/{question_slug}', [PastQuestionController::class, 'startPractice'])
-        ->name('view.start_practice');
-
-    Route::post('/practice/submit', [QuestionAttemptController::class, 'store'])
-        ->name('exam.submit');
-
-    Route::get('/practice/{past_question}/start', [PastQuestionController::class, 'practice'])
-        ->name('view.practice');
-
-    Route::get('/course_offerings', [CourseOfferingController::class, 'studentCoursesOfferings'])
-        ->name('course_offering.student_offerings');
-
-    Route::post('/course_offering', [CourseOfferingController::class, 'storeStudentElective'])
-        ->name('course_offering.store');
-
-    Route::delete('/course_offering/{course_offering}', [CourseOfferingController::class, 'destroy'])
-        ->name('course_offering.destroy');
-
-    Route::get('/profile', [ProfileController::class, 'update'])->name('profile.edit');
 
     Route::get('/become-contributor', [RoleRequestController::class, 'create'])
         ->name('role-requests.create');
@@ -112,6 +84,35 @@ Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,student,cont
 
     Route::post('/questions-of-the-day/{questionOfTheDay}/shared', [QuestionOfTheDayController::class, 'markShared'])
         ->name('qotd.shared');
+
+    Route::get('/contributors', [ContributorController::class, 'index'])->name('contributors.public');
+    Route::post('/practice/submit', [QuestionAttemptController::class, 'store'])
+        ->name('exam.submit');
+    Route::get('/practice/{past_question}/start', [PastQuestionController::class, 'practice'])
+        ->name('view.practice');
+
+});
+
+/*
+|--------------------------------------------------------------------------
+| Student routes
+| Accessible by: student, contributor, admin
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'verified', 'profile.setup', 'role:admin,student,contributor'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
+    Route::get('/full_timetable', [TimeTableController::class, 'viewFullTimetable'])->name('view.full_timetable');
+
+    Route::get('/course_offerings', [CourseOfferingController::class, 'studentCoursesOfferings'])
+        ->name('course_offering.student_offerings');
+
+    Route::post('/course_offering', [CourseOfferingController::class, 'storeStudentElective'])
+        ->name('course_offering.store');
+
+    Route::delete('/course_offering/{course_offering}', [CourseOfferingController::class, 'destroy'])
+        ->name('course_offering.destroy');
+
 });
 
 /*

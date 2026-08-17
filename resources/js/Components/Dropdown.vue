@@ -12,10 +12,14 @@ function toggle() {
 function close() {
     open.value = false
 }
-const isOnlyStudent = computed(() => {
+const isIdependentOrStudent = computed(() => {
     const roles = page.props.auth.user.roles
 
-    return roles.length === 1 && roles[0].name === 'student'
+    return roles[0].name === 'student' || roles[0].name === 'independent'
+})
+const isNotIdependent = computed(() => {
+    const roles = page.props.auth.user.roles
+    return roles[0].name !== 'independent'
 })
 </script>
 
@@ -92,6 +96,7 @@ const isOnlyStudent = computed(() => {
 
                     <!-- Profile -->
                     <Link
+                        v-if="isNotIdependent"
                         :href="route('profile.edit')"
                         @click="close"
                         class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition group"
@@ -109,6 +114,7 @@ const isOnlyStudent = computed(() => {
 
                     <!-- Course -->
                     <Link
+                        v-if="isNotIdependent"
                         href="/course_offerings"
                         @click="close"
                         class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition group"
@@ -150,7 +156,7 @@ const isOnlyStudent = computed(() => {
 
                 <!--                    Become a contributor -->
                 <div
-                    v-if="isOnlyStudent"
+                    v-if="isIdependentOrStudent"
                     class="p-1.5 border-primary border-2 rounded-md ">
                 <Link
                     href="/become-contributor"

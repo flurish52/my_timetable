@@ -23,6 +23,15 @@
             <p class="text-sm text-primary/70">
                 {{ history?.data?.length ? 'No attempts match your search.' : 'No practice attempts yet.' }}
             </p>
+                <button
+                    @click="startPractice($page.props.auth.user.roles)"
+                    class="mt-4 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-primary/25 transition hover:opacity-90 active:scale-[0.98]"
+                >
+                    Start practice
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                </button>
         </div>
 
         <ul v-else class="space-y-2.5">
@@ -69,7 +78,7 @@
 
 <script setup>
 import Pagination from './Pagination.vue'
-import { Link } from '@inertiajs/vue3'
+import {Link, router} from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 
 const props = defineProps({ history: Object })
@@ -98,4 +107,14 @@ const filtered = computed(() => {
     if (!q) return props.history?.data ?? []
     return (props.history?.data ?? []).filter(a => a.past_question?.title?.toLowerCase().includes(q))
 })
+
+function startPractice(roles) {
+    const isIndependent = roles?.some(r => r.name === 'independent')
+
+    if (isIndependent) {
+        router.visit('/activity?tab=scans')
+    } else {
+        router.visit('/pastquestions')
+    }
+}
 </script>

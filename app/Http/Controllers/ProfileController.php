@@ -64,7 +64,6 @@ class ProfileController extends Controller
         ], [
             'name' => $programmeName,
         ]);
-
         $user = auth()->user();
 
         $user->update([
@@ -72,7 +71,7 @@ class ProfileController extends Controller
             'level_id' => $data['level_id'],
             'school_id' => $data['school_id'],
         ]);
-
+        $user->syncRoles(['student']);
         return redirect()->route('dashboard');
     }
 
