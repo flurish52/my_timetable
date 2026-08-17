@@ -9,6 +9,7 @@
  *   <GoogleSignInButton href="/auth/google/redirect" />
  */
 import { ref } from 'vue'
+import {computed} from "vue";
 
 const props = defineProps({
     href: {
