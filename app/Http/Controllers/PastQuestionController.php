@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePastQuestionRequest;
+use App\Http\Requests\UpdatePastQuestionRequest;
 use App\Models\Course;
 use App\Models\CourseOffering;
 use App\Models\PastQuestion;
-use App\Http\Requests\StorePastQuestionRequest;
-use App\Http\Requests\UpdatePastQuestionRequest;
 use App\Models\ProgrammeLevelSemester;
 use App\Services\PastQuestionService;
 use Illuminate\Support\Facades\Auth;
@@ -15,9 +15,6 @@ use Inertia\Inertia;
 
 class PastQuestionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $user = Auth::user();
@@ -25,7 +22,7 @@ class PastQuestionController extends Controller
         if (! $user) {
             return Inertia::render('PastQuestions', [
                 'user' => $user,
-                'past_questions' => Course::with('past_question')->get(),
+                'past_questions' => Course::with(['past_question' => fn ($q) => $q->published()->with('semester')])->get(),
             ]);
         }
 
@@ -46,9 +43,8 @@ class PastQuestionController extends Controller
             ->pluck('course_id');
 
         $pastQuestions = Course::whereIn('id', $courseIds)
-            ->with(['past_question' => function ($query) {
-                $query->where('status', 'published')->with('semester');
-            }])->get();
+            ->with(['past_question' => fn ($q) => $q->published()->with('semester')])
+            ->get();
 
         return Inertia::render('PastQuestions', [
             'user' => $user,
@@ -60,6 +56,7 @@ class PastQuestionController extends Controller
     {
         return Inertia::render('PastQuestions/Index', [
             'pastQuestions' => PastQuestion::query()
+                ->pastPapers()
                 ->where('school_id', auth()->user()->school_id)
                 ->where('created_by', auth()->id())
                 ->with('course:id,code,title')
@@ -78,42 +75,45 @@ class PastQuestionController extends Controller
         ]);
     }
 
-    public function showCoursePapers($slug, PastQuestionService $pdfService) {
-        $course = Course::with(['past_question' => function ($query) {
-            $query->where('status', 'published')->with(['semester', 'creator']);
-        }])
+    public function showCoursePapers($slug, PastQuestionService $pdfService)
+    {
+        $course = Course::with(['past_question' => fn ($q) => $q->published()->with(['semester', 'creator'])])
             ->where('code', $slug)
-            ->first();
+            ->firstOrFail();
 
         foreach ($course->past_question as $paper) {
             $paper->source_file = $pdfService->resolvePdf($paper);
         }
 
-        return inertia('PastQuestionsPerCourse', [
+        return Inertia::render('PastQuestionsPerCourse', [
             'past_question' => $course,
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function startPractice($slug, $question_slug)
     {
-        return inertia::render('PracticePastQuestion/PracticePastQuestions', [
-                'past_question' => PastQuestion::with('course', 'semester',
-                    'school', 'sections', 'questions',
-                    'creator', 'updater')
-                    ->where('id', $question_slug)->first(),
+        $pastQuestion = PastQuestion::with('course', 'semester', 'school', 'sections', 'questions', 'creator', 'updater')
+            ->findOrFail($question_slug);
+
+        $this->authorizeView($pastQuestion);
+
+        return Inertia::render('PracticePastQuestion/PracticePastQuestions', [
+            'past_question' => $pastQuestion,
         ]);
     }
 
     public function practice($past_question)
     {
-        return inertia::render('PracticePastQuestion/StartPractice', [
-            'past_question' => PastQuestion::with('course', 'semester',
-                'school', 'sections', 'questions', 'questions.options', 'questions.answers',
-                'questions.media', 'creator', 'updater')
-                ->where('id', $past_question)->first(),
+        $pastQuestion = PastQuestion::with(
+            'course', 'semester', 'school', 'sections',
+            'questions', 'questions.options', 'questions.answers', 'questions.media',
+            'creator', 'updater'
+        )->findOrFail($past_question);
+
+        $this->authorizeView($pastQuestion);
+
+        return Inertia::render('PracticePastQuestion/StartPractice', [
+            'past_question' => $pastQuestion,
         ]);
     }
 
@@ -131,9 +131,6 @@ class PastQuestionController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StorePastQuestionRequest $request)
     {
         $data = $request->validated();
@@ -146,7 +143,6 @@ class PastQuestionController extends Controller
 
         return to_route('past-questions.build', $pastQuestion);
     }
-
 
     public function build(PastQuestion $pastQuestion)
     {
@@ -166,10 +162,6 @@ class PastQuestionController extends Controller
             'pastQuestion' => $pastQuestion,
         ]);
     }
-
-    /**
-     * Display the specified resource.
-     */
 
     public function show(PastQuestion $pastQuestion)
     {
@@ -193,34 +185,25 @@ class PastQuestionController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(PastQuestion $pastQuestion)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdatePastQuestionRequest $request, PastQuestion $pastQuestion)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(PastQuestion $pastQuestion)
     {
         //
     }
 
-
     public function togglePublish(PastQuestion $pastQuestion)
     {
         abort_unless((int) $pastQuestion->created_by === (int) Auth::id(), 403);
+        abort_if($pastQuestion->kind === 'notes_quiz', 403);
 
         $togglingToPublished = $pastQuestion->status !== 'published';
 
@@ -245,6 +228,7 @@ class PastQuestionController extends Controller
             $pastQuestion->status === 'published' ? 'Past question published.' : 'Moved back to draft.'
         );
     }
+
     private function uniqueSlug(string $title, string $session): string
     {
         $base = Str::slug($title . '-' . str_replace('/', '-', $session));
@@ -257,5 +241,16 @@ class PastQuestionController extends Controller
         }
 
         return $slug;
+    }
+
+    /** Public if published; otherwise only the owner or an admin. 404 (not 403) so IDs can't be probed. */
+    private function authorizeView(PastQuestion $pq): void
+    {
+        $user = auth()->user();
+
+        $allowed = ($pq->visibility === 'published' && $pq->status === 'published')
+            || ($user && ((int) $pq->created_by === (int) $user->id || $user->hasRole('admin')));
+
+        abort_unless($allowed, 404);
     }
 }

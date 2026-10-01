@@ -12,16 +12,19 @@ class ScanAttempt extends Model
 
     protected $fillable = [
         'user_id',
+        'type',
         'past_question_id',
         'status',
         'rejection_reason',
         'raw_ai_response',
         'file_paths',
+        'options',
     ];
 
     protected $casts = [
         'raw_ai_response' => 'array',
         'file_paths' => 'array',
+        'options' => 'array',
     ];
 
     public function user(): BelongsTo

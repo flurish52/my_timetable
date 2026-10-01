@@ -76,6 +76,8 @@ class Question extends Model
         'topic_tag',
         'answer_source',
         'answer_confidence',
+        'explanation',
+        'source_excerpt',
     ];
 
     protected $casts = [

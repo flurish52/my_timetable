@@ -73,7 +73,7 @@
                             </svg>
                         </div>
                         <div class="flex flex-col gap-0.5">
-                            <span class="stat-value text-[1.15rem] font-bold text-[#0f1422] leading-none">{{ past_question.duration_minutes ?? '—' }}<span v-if="past_question.duration_minutes"> min</span></span>
+                            <span class="stat-value text-[1.15rem] font-bold text-[#0f1422] leading-none">{{ past_question.duration_minutes ?? '120 min' }}<span v-if="past_question.duration_minutes"> min</span></span>
                             <span class="text-[0.7rem] font-medium text-[#9ca3af] uppercase tracking-wider">Duration</span>
                         </div>
                     </div>

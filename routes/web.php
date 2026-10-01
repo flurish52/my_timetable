@@ -10,6 +10,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DeviceTokenController;
 use App\Http\Controllers\HeartbeatController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NotesScanController;
 use App\Http\Controllers\PastQuestionController;
 use App\Http\Controllers\PastQuestionImportController;
 use App\Http\Controllers\ProfileController;
@@ -50,6 +51,14 @@ Route::get('/scan/{course?}', [ScanController::class, 'create'])->name('scan.cre
 Route::get('/pastquestions/{slug}/{question_slug}', [PastQuestionController::class, 'startPractice'])
     ->name('view.start_practice');
 
+
+Route::get('/scan-notes/review/{pastQuestion}', [NotesScanController::class, 'review'])->name('scan.notes.review');
+Route::get('/scan-notes/{course?}', [NotesScanController::class, 'create'])->name('scan.notes.create');
+Route::post('/scan-notes', [NotesScanController::class, 'store'])->name('scan.notes.store');
+
+
+Route::patch('/scan-notes/questions/{question}', [NotesScanController::class, 'updateQuestion'])->name('scan.notes.questions.update');
+Route::delete('/scan-notes/questions/{question}', [NotesScanController::class, 'destroyQuestion'])->name('scan.notes.questions.destroy');
 
 /*
 |--------------------------------------------------------------------------

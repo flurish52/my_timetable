@@ -2,36 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\BuildScannedPastQuestion;
 use App\Contracts\QuestionExtractorContract;
+use App\Exceptions\AiServiceRateLimitedException;
 use App\Models\Course;
 use App\Models\PastQuestion;
-use App\Models\Question;
-use App\Models\QuestionAnswer;
-use App\Models\QuestionOption;
-use App\Models\QuestionSection;
 use App\Models\ScanAttempt;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
-use Throwable;
 use Smalot\PdfParser\Parser as PdfParser;
-
+use Throwable;
 
 class ScanController extends Controller
 {
-    private const DAILY_SCAN_LIMIT = 5;
+    public const DAILY_SCAN_LIMIT = 3;
 
-    private const MAX_IMAGES_PER_SCAN = 6;
+    public const MAX_IMAGES_PER_SCAN = 10;
 
     public function __construct(
-        private readonly QuestionExtractorContract $extractor
-    )
-    {
+        private readonly QuestionExtractorContract $extractor,
+        private readonly BuildScannedPastQuestion $builder,
+    ) {
     }
 
     public function create(Request $request, ?string $courseId = null): Response
@@ -44,7 +40,6 @@ class ScanController extends Controller
         ]);
     }
 
-
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
@@ -54,28 +49,29 @@ class ScanController extends Controller
         ]);
 
         $files = $request->file('images');
-        $pdfCount = collect($files)->filter(fn($f) => $f->getClientMimeType() === 'application/pdf')->count();
+        $pdfCount = collect($files)->filter(fn ($f) => $f->getMimeType() === 'application/pdf')->count();
 
-        // A PDF replaces the whole batch — no mixing PDF + photos, and only one PDF at a time.
+        // A PDF replaces the whole batch: no mixing PDF + photos, and only one PDF at a time.
         if ($pdfCount > 0 && count($files) > 1) {
             return back()->withErrors([
-                'images' => 'Upload either a single PDF or up to ' . self::MAX_IMAGES_PER_SCAN . ' photos — not both.',
+                'images' => 'Upload either a single PDF or up to ' . self::MAX_IMAGES_PER_SCAN . ' photos, not both.',
             ]);
         }
 
-        // PDF page count is the real cost driver — check it before touching Gemini at all.
+        // PDF page count is the real cost driver, so check it before touching Gemini at all.
         if ($pdfCount === 1) {
-            $pageCount = (new PdfParser())->parseFile($files[0]->getRealPath())->getPages();
+            $pages = count((new PdfParser())->parseFile($files[0]->getRealPath())->getPages());
 
-            if (count($pageCount) > self::MAX_IMAGES_PER_SCAN) {
+            if ($pages > self::MAX_IMAGES_PER_SCAN) {
                 return back()->withErrors([
-                    'images' => 'That PDF has ' . count($pageCount) . ' pages — max ' . self::MAX_IMAGES_PER_SCAN . ' pages per scan.',
+                    'images' => "That PDF has {$pages} pages. Max " . self::MAX_IMAGES_PER_SCAN . ' pages per scan.',
                 ]);
             }
         }
 
         $user = $request->user();
 
+        // Notes scans and paper scans share one daily limit (same AI cost).
         $todaysScanCount = ScanAttempt::where('user_id', $user->id)
             ->whereDate('created_at', today())
             ->whereIn('status', ['success', 'rejected'])
@@ -90,7 +86,7 @@ class ScanController extends Controller
         $paths = [];
         $fullPaths = [];
 
-        foreach ($request->file('images') as $file) {
+        foreach ($files as $file) {
             $path = $file->store('scans/' . $user->id, 'local');
             $paths[] = $path;
             $fullPaths[] = Storage::disk('local')->path($path);
@@ -98,19 +94,26 @@ class ScanController extends Controller
 
         $scanAttempt = ScanAttempt::create([
             'user_id' => $user->id,
+            'type' => 'paper',
             'status' => 'pending',
             'file_paths' => $paths,
         ]);
 
         try {
             $result = $this->extractor->extract($fullPaths);
+        } catch (AiServiceRateLimitedException $e) {
+            Log::warning('Scan extraction rate limited', ['scan_attempt_id' => $scanAttempt->id]);
+
+            $scanAttempt->update([
+                'status' => 'failed',
+                'rejection_reason' => 'Rate limited by AI provider.',
+            ]);
+
+            return back()->withErrors([
+                'images' => 'We\'re seeing high traffic right now. Please wait a minute and try scanning again.',
+            ]);
         } catch (Throwable $e) {
-            // Log the real error internally, but NEVER expose $e->getMessage()
-            // to the user — for HTTP client exceptions (e.g. cURL/connection
-            // errors calling Gemini) the message contains the full request
-            // URL, including the API key in the query string. Only safe,
-            // non-sensitive details go into rejection_reason and the flash
-            // error shown to the user.
+            // Log the real error internally, but NEVER expose $e->getMessage() to the user.
             Log::error('Scan extraction failed', [
                 'scan_attempt_id' => $scanAttempt->id,
                 'exception' => get_class($e),
@@ -122,15 +125,15 @@ class ScanController extends Controller
                 'rejection_reason' => 'Extraction failed: ' . get_class($e),
             ]);
 
-            // Files stay on disk for the 24-48h retry window per policy —
+            // Files stay on disk for the 24-48h retry window per policy;
             // the scheduled cleanup command purges them later regardless of status.
             return back()->withErrors([
                 'images' => 'We couldn\'t process your scan right now. Please try again in a moment.',
             ]);
         }
 
-        $isInvalid = !$result['is_valid_question_paper'];
-        $isMixedPaper = !($result['is_single_paper'] ?? true);
+        $isInvalid = ! $result['is_valid_question_paper'];
+        $isMixedPaper = ! ($result['is_single_paper'] ?? true);
 
         if ($isInvalid || $isMixedPaper) {
             $scanAttempt->update([
@@ -149,20 +152,10 @@ class ScanController extends Controller
         $courseId = $request->integer('course_id') ?: null;
 
         try {
-            $pastQuestion = DB::transaction(function () use ($result, $courseId, $user) {
-                return $this->buildPastQuestion($result, $courseId, $user->id);
-            });
-        } catch (\App\Exceptions\AiServiceRateLimitedException $e) {
-            Log::warning('Scan extraction rate limited', ['scan_attempt_id' => $scanAttempt->id,]);
-
-            $scanAttempt->update(['status' => 'failed',
-                'rejection_reason' => 'Rate limited by AI provider.',]);
-
-            return back()->withErrors(['images' => 'We\'re seeing high traffic right now. Please wait a minute and try scanning again.',]);
-        } catch
-        (Throwable $e) {
-            // Same rule as above — log the real exception, never surface
-            // $e->getMessage() to the user or store it verbatim.
+            $pastQuestion = DB::transaction(
+                fn () => $this->builder->handle($result, $user->id, $courseId, 'past_question')
+            );
+        } catch (Throwable $e) {
             Log::error('Failed to save extracted past question', [
                 'scan_attempt_id' => $scanAttempt->id,
                 'exception' => get_class($e),
@@ -177,7 +170,7 @@ class ScanController extends Controller
             return back()->withErrors(['images' => 'Something went wrong saving your paper. Please try again.']);
         }
 
-        // Success — delete the temp images immediately per our retention policy.
+        // Success: delete the temp images immediately per our retention policy.
         Storage::disk('local')->delete($paths);
 
         $scanAttempt->update([
@@ -195,86 +188,27 @@ class ScanController extends Controller
                     'slug' => $course->code,
                     'question_slug' => $pastQuestion->id,
                 ])
-                ->with('status', 'Paper scanned successfully — review your questions below.');
+                ->with('status', 'Paper scanned successfully. Review your questions below.');
         }
 
         return redirect()
             ->route('scan.review', $pastQuestion)
-            ->with('status', 'Paper scanned successfully — review your questions below.');
+            ->with('status', 'Paper scanned successfully. Review your questions below.');
     }
 
     public function review(PastQuestion $pastQuestion): Response
     {
+        $user = auth()->user();
+
+        abort_unless(
+            (int) $pastQuestion->created_by === (int) $user->id || $user->hasRole('admin'),
+            404
+        );
+
         return Inertia::render('PracticePastQuestion/PracticePastQuestions', [
             'past_question' => $pastQuestion->load(
                 'course', 'semester', 'school', 'sections', 'questions', 'creator', 'updater'
             ),
         ]);
-    }
-
-    private function buildPastQuestion(array $result, ?int $courseId, int $userId): PastQuestion
-    {
-        $pastQuestion = PastQuestion::create([
-            'course_id' => $courseId,
-            'raw_course_label' => $courseId ? null : $result['course_guess'],
-            'semester_id' => null,
-            'school_id' => null,
-            'session' => 'Unspecified',
-            'title' => $result['course_guess'] ?? 'Scanned Paper_' . $userId,
-            'status' => 'draft',
-            'visibility' => 'private',
-            'slug' => Str::slug(($result['course_guess'] ?? 'scanned-paper') . '-' . Str::random(6)),
-            'source_file' => 'scan',
-            'created_by' => $userId,
-        ]);
-
-        // Sections are created dynamically per distinct section_label, in the
-        // order they first appear — handles single-section objective papers
-        // and multi-section papers (e.g. Section A objective, Section B
-        // fill-in-the-blank) the same way, with no hardcoding either way.
-        $sections = [];
-
-        foreach ($result['questions'] as $index => $q) {
-            $label = $q['section_label'] ?? 'Section A';
-
-            if (!isset($sections[$label])) {
-                $sections[$label] = QuestionSection::create([
-                    'past_question_id' => $pastQuestion->id,
-                    'title' => $label,
-                    'instructions' => $q['section_instructions'] ?? null,
-                    'position' => count($sections) + 1,
-                ]);
-            }
-
-            $question = Question::create([
-                'past_question_id' => $pastQuestion->id,
-                'question_section_id' => $sections[$label]->id,
-                'question_type' => $q['question_type'] ?? 'objective',
-                'question_text' => $q['question_text'],
-                'topic_tag' => $q['topic_tag'] ?? null,
-                'marks' => 1,
-                'position' => $index + 1,
-                'answer_source' => ($q['answer_source'] ?? 'ai_generated') === 'from_image' ? 'human' : 'ai_generated',
-                'answer_confidence' => $q['answer_confidence'] ?? null,
-            ]);
-
-            if (!empty($q['options'])) {
-                foreach ($q['options'] as $optionText) {
-                    $letter = strtoupper(trim(substr($optionText, 0, 1)));
-                    QuestionOption::create([
-                        'question_id' => $question->id,
-                        'option_text' => $optionText,
-                        'is_correct' => $letter === strtoupper(trim($q['answer'] ?? '')),
-                    ]);
-                }
-            } else {
-                QuestionAnswer::create([
-                    'question_id' => $question->id,
-                    'answer_text' => $q['answer'] ?? '',
-                ]);
-            }
-        }
-
-        return $pastQuestion;
     }
 }

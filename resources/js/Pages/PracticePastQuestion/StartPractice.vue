@@ -34,7 +34,7 @@
                     :sections="sections"
                     :answers="submittedAnswers"
                     :course-code="past_question.course?.code ?? ''"
-                    :course-title="past_question.course?.title ?? 'Untitled course'"
+                    :course-title="past_question.course?.title ?? past_question.title ?? 'Untitled course'"
                     :score-percent="scorePercent"
                     :correct-count="correctCount"
                     :wrong-count="wrongCount"
@@ -171,12 +171,13 @@ const scorePercent = computed(() =>
 )
 
 function isCorrect(q, userAnswer) {
+
     if (userAnswer === undefined || userAnswer === '') {
         return false
     }
 
     // MCQ
-    if (isMcq(q)) {
+    if (isMcq(q) || isTrueFalse(q)) {
         const ci = q?.options?.findIndex(
             o => Number(o.is_correct) === 1
         ) ?? -1

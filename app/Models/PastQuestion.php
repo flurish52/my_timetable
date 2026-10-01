@@ -11,6 +11,25 @@ class PastQuestion extends Model
     use HasFactory;
 
 
+    protected $fillable = [
+        'school_id',
+        'course_id',
+        'semester_id',
+        'session',
+        'title',
+        'instructions',
+        'description',
+        'duration_minutes',
+        'source_file',
+        'created_by',
+        'updated_by',
+        'slug',
+        'status',
+        'visibility',
+        'kind',
+        'raw_course_label',
+    ];
+
     public function course()
     {
         return $this->belongsTo(Course::class);
@@ -69,20 +88,13 @@ class PastQuestion extends Model
 
 
 
-    protected $fillable = [
-        'school_id',
-        'course_id',
-        'semester_id',
-        'session',
-        'title',
-        'instructions',
-        'description',
-        'duration_minutes',
-        'source_file',
-        'created_by',
-        'updated_by',
-        'slug',
-        'visibility',
-        'raw_course_label',
-    ];
+    public function scopePastPapers($query)
+    {
+        return $query->where('kind', 'past_question');
+    }
+
+    public function scopeNotesQuizzes($query)
+    {
+        return $query->where('kind', 'notes_quiz');
+    }
 }

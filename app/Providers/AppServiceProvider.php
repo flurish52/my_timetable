@@ -18,6 +18,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Contracts\QuestionExtractorContract::class,
             \App\Services\GeminiQuestionExtractor::class
         );
+
+        $this->app->bind(
+            \App\Contracts\NotesQuestionGeneratorContract::class,
+            \App\Services\GeminiNotesQuestionGenerator::class
+        );
     }
 
     /**

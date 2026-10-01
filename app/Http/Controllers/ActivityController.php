@@ -21,19 +21,23 @@ class ActivityController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $tab = $request->query('tab', 'scans') === 'history' ? 'history' : 'scans';
+        $tab = in_array($request->query('tab'), ['scans', 'notes', 'history'], true)
+            ? $request->query('tab')
+            : 'scans';
 
 
         return Inertia::render('Activity/Index', [
             'activeTab' => $tab,
-
             'scans' => $tab === 'scans'
-                ? fn () => $this->scansQuery($user->id)->paginate(15)->withQueryString()
-                : Inertia::lazy(fn () => $this->scansQuery($user->id)->paginate(15)->withQueryString()),
+                ? fn() => $this->scansQuery($user->id, 'past_question')->paginate(15)->withQueryString()
+                : Inertia::lazy(fn() => $this->scansQuery($user->id, 'past_question')->paginate(15)->withQueryString()),
+            'notes' => $tab === 'notes'
+                ? fn() => $this->scansQuery($user->id, 'notes_quiz')->paginate(15)->withQueryString()
+                : Inertia::lazy(fn() => $this->scansQuery($user->id, 'notes_quiz')->paginate(15)->withQueryString()),
 
             'history' => $tab === 'history'
-                ? fn () => $this->historyQuery($user->id)->paginate(15)->withQueryString()
-                : Inertia::lazy(fn () => $this->historyQuery($user->id)->paginate(15)->withQueryString()),
+                ? fn() => $this->historyQuery($user->id)->paginate(15)->withQueryString()
+                : Inertia::lazy(fn() => $this->historyQuery($user->id)->paginate(15)->withQueryString()),
         ]);
     }
 
@@ -48,6 +52,7 @@ class ActivityController extends Controller
             ->where('created_by', $userId)
             ->where('visibility', 'private')
             ->with('course')
+            ->withCount('questions')
             ->latest();
     }
 

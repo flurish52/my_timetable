@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use App\Contracts\QuestionExtractorContract;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class GeminiQuestionExtractor implements QuestionExtractorContract
@@ -47,85 +45,23 @@ Rules:
 - If multiple images are provided and they DO belong to the same paper, treat them as consecutive pages and number questions continuously across all pages.
 PROMPT;
 
+    public function __construct(private readonly GeminiClient $client)
+    {
+    }
+
     public function extract(array $imagePaths): array
     {
-        $parts = [['text' => self::PROMPT]];
-        foreach ($imagePaths as $path) {
-            $parts[] = [
-                'inline_data' => [
-                    'mime_type' => mime_content_type($path),
-                    'data' => base64_encode(file_get_contents($path)),
-                ],
-            ];
-        }
-
-        $response = Http::timeout(60)
-            ->withHeaders([
-                'Content-Type' => 'application/json',
-            ])
-            ->post(
-                sprintf(
-                    'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s',
-                    config('services.gemini.model'),
-                    config('services.gemini.key')
-                ),
-                [
-                    'contents' => [
-                        [
-                            'parts' => $parts,
-                        ],
-                    ],
-                    'generationConfig' => [
-                        'temperature' => 0.1,
-                        'response_mime_type' => 'application/json',
-                    ],
-                ]
-            );
-
-        Log::info('Gemini raw response', [
-            'status' => $response->status(),
-            'successful' => $response->successful(),
-            'failed' => $response->failed(),
-            'body' => $response->body(),
-            'json' => $response->json(),
+        $text = $this->client->generate([
+            ['text' => self::PROMPT],
+            ...$this->client->fileParts($imagePaths),
         ]);
-
-        if ($response->status() === 429) {
-            Log::warning('Gemini rate limited', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
-
-            throw new \App\Exceptions\AiServiceRateLimitedException(
-                'Gemini rate limit hit: ' . $response->body()
-            );
-        }
-
-        if ($response->failed()) {
-            throw new RuntimeException(
-                'AI returned HTTP ' . $response->status() . ': ' . $response->body()
-            );
-        }
-
-        $text = data_get($response->json(), 'candidates.0.content.parts.0.text');
-
-        if (! $text) {
-            throw new RuntimeException('The AI service returned an empty response, Please try again.');
-        }
 
         return $this->parseAndValidate($text);
     }
 
     private function parseAndValidate(string $text): array
     {
-        $cleaned = trim(preg_replace('/^```json|```$/m', '', $text));
-
-        $data = json_decode($cleaned, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE || ! is_array($data)) {
-            Log::warning('Gemini returned malformed JSON', ['raw' => $text]);
-            throw new RuntimeException('Could not parse the AI response. Please try scanning again.');
-        }
+        $data = $this->client->decodeJson($text);
 
         foreach (['is_valid_question_paper', 'confidence', 'questions'] as $key) {
             if (! array_key_exists($key, $data)) {
@@ -133,21 +69,12 @@ PROMPT;
             }
         }
 
-        // Defense in depth — don't rely solely on the model setting is_single_paper
+        // Defense in depth: don't rely solely on the model setting is_single_paper
         // correctly. If it forgot to flag a mismatch but the extracted questions
         // still carry wildly inconsistent topic_tags/course signals, this is where
         // a future heuristic check could go. For now, default missing flag to true.
         $data['is_single_paper'] = $data['is_single_paper'] ?? true;
 
         return $data;
-    }
-
-    private function mimeTypeFor(string $path): string
-    {
-        return match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
-            'png' => 'image/png',
-            'webp' => 'image/webp',
-            default => 'image/jpeg',
-        };
     }
 }
